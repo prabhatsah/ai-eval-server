@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  MANAGER
+  EMPLOYEE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  attempts Attempt[]
+}
+
+model Evaluation {
+  id        String   @id @default(uuid())
+  title     String
+  skill     String
+  config    Json
+  createdBy String
+  createdAt DateTime @default(now())
+
+  attempts Attempt[]
+}
+
+model Attempt {
+  id           String @id @default(uuid())
+  userId       String
+  evaluationId String
+  status       String
+
+  mcqScore    Float?
+  codingScore Float?
+  aiScore     Float?
+  finalScore  Float?
+
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  user       User       @relation(fields: [userId], references: [id])
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id])
+
+  responses Response[]
+}
+
+model Response {
+  id        String @id @default(uuid())
+  attemptId String
+
+  question String
+  answer   String
+  score    Float?
+  feedback String?
+  type     String
+
+  attempt Attempt @relation(fields: [attemptId], references: [id])
+}
