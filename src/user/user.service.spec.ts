@@ -1,12 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 describe('UserService', () => {
   let service: UserService;
 
+  const mockPrisma = {
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+    },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService],
+      providers: [
+        UserService,
+        {
+          provide: PrismaService,
+          useValue: mockPrisma, // 👈 inject mock
+        },
+      ],
     }).compile();
 
     service = module.get<UserService>(UserService);
