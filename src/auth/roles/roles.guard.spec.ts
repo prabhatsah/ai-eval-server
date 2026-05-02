@@ -10,13 +10,15 @@ describe('RolesGuard', () => {
   });
 
   it('should allow matching role', () => {
+    const handler = () => {};
+
     const context = {
       switchToHttp: () => ({
         getRequest: () => ({
           user: { role: 'MANAGER' },
         }),
       }),
-      getHandler: () => {},
+      getHandler: () => handler,
     } as unknown as ExecutionContext;
 
     Reflect.defineMetadata('roles', ['MANAGER'], context.getHandler());
@@ -25,13 +27,15 @@ describe('RolesGuard', () => {
   });
 
   it('should deny non-matching role', () => {
+    const handler = () => {};
+
     const context = {
       switchToHttp: () => ({
         getRequest: () => ({
           user: { role: 'EMPLOYEE' },
         }),
       }),
-      getHandler: () => {},
+      getHandler: () => handler,
     } as unknown as ExecutionContext;
 
     Reflect.defineMetadata('roles', ['MANAGER'], context.getHandler());
