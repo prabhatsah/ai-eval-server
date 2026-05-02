@@ -6,7 +6,7 @@
 
 ```bash
 git clone <repo-url>
-cd ai-evaluation-backend
+cd ai-eval-serve
 ```
 
 ---
@@ -55,13 +55,13 @@ JWT_SECRET="testsecret"
 #### Dev DB:
 
 ```bash
-npm run db:dev
+npm run migrate:dev
 ```
 
 #### Test DB:
 
 ```bash
-npm run db:test
+npm run migrate:test
 ```
 
 ---
@@ -114,5 +114,5 @@ npm run test:e2e
 - Reset test DB if needed:
 
 ```bash
-npm run db:reset:test
+npm run migrate:reset:test
 ```

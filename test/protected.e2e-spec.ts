@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { cleanDb } from './utils/db';
 
 describe('Protected Routes (e2e)', () => {
   let app: INestApplication;
@@ -21,6 +23,8 @@ describe('Protected Routes (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    await cleanDb(app.get(PrismaService));
 
     // signup
     await request(app.getHttpServer()).post('/auth/signup').send(user);
