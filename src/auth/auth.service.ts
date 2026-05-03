@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -10,7 +12,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signup(dto: any) {
+  async signup(dto: SignupDto) {
     const existingUser = await this.userService.findByEmail(dto.email);
     if (existingUser) {
       throw new Error('User already exists');
@@ -26,7 +28,7 @@ export class AuthService {
     return { message: 'User created', user };
   }
 
-  async login(dto: any) {
+  async login(dto: LoginDto) {
     const user = await this.userService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
