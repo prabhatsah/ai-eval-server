@@ -20,12 +20,12 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    const user = await this.userService.createUser({
+    await this.userService.createUser({
       ...dto,
       password: hashedPassword,
     });
 
-    return { message: 'User created', user };
+    return { message: 'User created' };
   }
 
   async login(dto: LoginDto) {
