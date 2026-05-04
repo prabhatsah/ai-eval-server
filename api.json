@@ -1,0 +1,411 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "AuthController_signup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered"
+          },
+          "400": {
+            "description": "Invalid input data"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Login user and return JWT token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/evaluations": {
+      "post": {
+        "operationId": "EvaluationController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEvaluationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Evaluation created successfully"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new evaluation (Manager only)",
+        "tags": [
+          "Evaluations"
+        ]
+      },
+      "get": {
+        "operationId": "EvaluationController_getAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of evaluations"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all evaluations",
+        "tags": [
+          "Evaluations"
+        ]
+      }
+    },
+    "/evaluations/{id}": {
+      "get": {
+        "operationId": "EvaluationController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evaluation found"
+          },
+          "404": {
+            "description": "Evaluation not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get evaluation by ID",
+        "tags": [
+          "Evaluations"
+        ]
+      }
+    },
+    "/attempt/start": {
+      "post": {
+        "operationId": "AttemptController_start",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAttemptDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Attempt started successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start a new attempt",
+        "tags": [
+          "Attempts"
+        ]
+      }
+    },
+    "/attempt/answer": {
+      "post": {
+        "operationId": "AttemptController_submit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAnswerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Answer submitted successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit answer for a question",
+        "tags": [
+          "Attempts"
+        ]
+      }
+    },
+    "/attempt/submit": {
+      "post": {
+        "operationId": "AttemptController_finalize",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Attempt submitted successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Finalize attempt and calculate score",
+        "tags": [
+          "Attempts"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "AI Evaluation API",
+    "description": "API documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "SignupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "test@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "StrongPass123"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "MANAGER",
+              "EMPLOYEE"
+            ],
+            "example": "MANAGER"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "role"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "test@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "StrongPass123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "SectionConfigDto": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "example": 0.5,
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "weight"
+        ]
+      },
+      "SectionsDto": {
+        "type": "object",
+        "properties": {
+          "AI": {
+            "$ref": "#/components/schemas/SectionConfigDto"
+          },
+          "MCQ": {
+            "$ref": "#/components/schemas/SectionConfigDto"
+          },
+          "CODING": {
+            "$ref": "#/components/schemas/SectionConfigDto"
+          }
+        },
+        "required": [
+          "AI",
+          "MCQ",
+          "CODING"
+        ]
+      },
+      "CreateEvaluationDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Frontend Assessment"
+          },
+          "skill": {
+            "type": "string",
+            "example": "React"
+          },
+          "sections": {
+            "$ref": "#/components/schemas/SectionsDto"
+          },
+          "passingScore": {
+            "type": "number",
+            "example": 60,
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "title",
+          "skill",
+          "sections",
+          "passingScore"
+        ]
+      },
+      "StartAttemptDto": {
+        "type": "object",
+        "properties": {
+          "evaluationId": {
+            "type": "string",
+            "example": "evaluation-uuid"
+          }
+        },
+        "required": [
+          "evaluationId"
+        ]
+      },
+      "SubmitAnswerDto": {
+        "type": "object",
+        "properties": {
+          "attemptId": {
+            "type": "string",
+            "example": "attempt-uuid"
+          },
+          "question": {
+            "type": "string",
+            "example": "What is closure in JavaScript?"
+          },
+          "answer": {
+            "type": "string",
+            "example": "A closure is a function with preserved scope..."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "MCQ",
+              "CODING",
+              "AI"
+            ],
+            "example": "AI"
+          }
+        },
+        "required": [
+          "attemptId",
+          "question",
+          "answer",
+          "type"
+        ]
+      }
+    }
+  }
+}
