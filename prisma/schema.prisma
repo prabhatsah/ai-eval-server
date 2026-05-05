@@ -25,6 +25,8 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
+  refreshToken String?
+
   attempts Attempt[]
 }
 

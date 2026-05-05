@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AttemptService } from './attempt.service';
+import { QuestionType } from './dto/submit-answer.dto';
 
 describe('AttemptService', () => {
   let service: AttemptService;
@@ -24,7 +25,7 @@ describe('AttemptService', () => {
       attemptId: '1',
       question: 'What is React?',
       answer: 'Library',
-      type: 'AI',
+      type: QuestionType.AI,
     });
 
     expect(aiMock.evaluateAnswer).toHaveBeenCalled();

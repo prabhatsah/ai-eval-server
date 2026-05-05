@@ -37,8 +37,12 @@ This will start:
 Create `.env`:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ai_eval?schema=public"
-JWT_SECRET="supersecret"
+DATABASE_URL="YOUR_DB_URL"
+
+JWT_ACCESS_SECRET="YOUR_SECRET"
+JWT_REFRESH_SECRET="YOUR_REFRESH_SECRET"
+
+OPENAI_API_KEY=YOUR_API_KEY
 ```
 
 Create `.env.test`:
@@ -55,6 +59,7 @@ JWT_SECRET="testsecret"
 #### Dev DB:
 
 ```bash
+npm run generate:dev
 npm run migrate:dev
 ```
 
