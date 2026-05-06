@@ -35,7 +35,6 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.userService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
-    console.log('User:', user);
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
@@ -45,11 +44,19 @@ export class AuthService {
       role: user.role,
     };
 
-    const tokens = this.generateTokens(payload);
+    const { accessToken, refreshToken } = this.generateTokens(payload);
 
-    await this.saveRefreshToken(user.id, tokens.refreshToken);
+    await this.saveRefreshToken(user.id, refreshToken);
 
-    return { tokens };
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
   async refreshTokens(refreshToken: string) {

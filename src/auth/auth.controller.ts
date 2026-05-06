@@ -26,16 +26,17 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { tokens } = await this.authService.login(dto);
+    const { accessToken, refreshToken, user } =
+      await this.authService.login(dto);
 
-    res.cookie('refresh_token', tokens.refreshToken, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return { access_token: tokens.accessToken };
+    return { accessToken, user };
   }
 
   @Post('refresh')
@@ -44,33 +45,33 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = (req.cookies as Record<string, string>)[
-      'refresh_token'
+      'refreshToken'
     ];
 
     const { accessToken, refreshToken: newRefreshToken } =
       await this.authService.refreshTokens(refreshToken);
 
-    res.cookie('refresh_token', newRefreshToken, {
+    res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return { access_token: accessToken };
+    return { accessToken: accessToken };
   }
 
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = (req.cookies as Record<string, string>)[
-      'refresh_token'
+      'refreshToken'
     ];
 
     if (refreshToken) {
       await this.authService.logout(refreshToken);
     }
 
-    res.clearCookie('refresh_token');
+    res.clearCookie('refreshToken');
 
     return { message: 'Logged out' };
   }
