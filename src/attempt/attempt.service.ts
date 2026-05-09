@@ -40,10 +40,9 @@ export class AttemptService {
     let feedback: string | null = null;
 
     if (type === 'AI') {
-      const aiResult = await this.aiService.evaluateAnswer(question, answer);
-
-      score = aiResult.score;
-      feedback = aiResult.feedback;
+      // const aiResult = await this.aiService.evaluateAnswer(question, answer);
+      // score = aiResult.score;
+      // feedback = aiResult.feedback;
     }
 
     return this.prisma.response.create({

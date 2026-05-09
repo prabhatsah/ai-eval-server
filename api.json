@@ -262,6 +262,70 @@
           "Attempts"
         ]
       }
+    },
+    "/ai/generate-assessment": {
+      "post": {
+        "operationId": "AiController_generateAssessment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assessment generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateAssessmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Generate MCQ and coding assessment questions",
+        "tags": [
+          "Assessment"
+        ]
+      }
+    },
+    "/ai/interview": {
+      "post": {
+        "operationId": "AiController_processInterview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview evaluation and next question generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessInterviewResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Process interview answer and generate next question",
+        "tags": [
+          "Assessment"
+        ]
+      }
     }
   },
   "info": {
@@ -432,6 +496,281 @@
           "question",
           "answer",
           "type"
+        ]
+      },
+      "GenerateAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "example": "Node",
+            "description": "Technology or topic for the assessment"
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "medium",
+            "description": "Difficulty level of the assessment"
+          },
+          "mcqCount": {
+            "type": "number",
+            "example": 1,
+            "description": "Number of MCQ questions to generate"
+          },
+          "codingCount": {
+            "type": "number",
+            "example": 1,
+            "description": "Number of coding questions to generate"
+          }
+        },
+        "required": [
+          "topic",
+          "difficulty",
+          "mcqCount",
+          "codingCount"
+        ]
+      },
+      "McqDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "example": "Which of the following is a correct way to import a module in Node.js?",
+            "description": "MCQ question"
+          },
+          "options": {
+            "example": [
+              "A) require('module-name');",
+              "B) import 'module-name';",
+              "C) include 'module-name';",
+              "D) use 'module-name';"
+            ],
+            "description": "Available answer options",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "correctAnswer": {
+            "type": "string",
+            "example": "A",
+            "description": "Correct answer option"
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "medium",
+            "description": "Difficulty level of the MCQ"
+          },
+          "explanation": {
+            "type": "string",
+            "example": "In Node.js, the `require` function is used to load and return the exports of a module. The other options are not valid syntax for importing modules in Node.js.",
+            "description": "Explanation of the correct answer"
+          }
+        },
+        "required": [
+          "question",
+          "options",
+          "correctAnswer",
+          "difficulty",
+          "explanation"
+        ]
+      },
+      "CodingQuestionDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "File Reader",
+            "description": "Title of the coding problem"
+          },
+          "problem": {
+            "type": "string",
+            "example": "Write a Node.js program that reads a file from disk, counts the number of lines, and prints the total line count to the console. The path to the file will be provided as an argument when running the script.",
+            "description": "Detailed coding problem statement"
+          },
+          "constraints": {
+            "type": "string",
+            "example": "The solution should handle errors gracefully and not crash if the file does not exist or is unreadable. Assume the file contains only text data with newlines separating each line.",
+            "description": "Constraints for solving the problem"
+          },
+          "sampleInput": {
+            "type": "string",
+            "example": "./path/to/file.txt",
+            "description": "Sample input for the coding problem"
+          },
+          "sampleOutput": {
+            "type": "string",
+            "example": "Total lines: 100",
+            "description": "Expected sample output"
+          },
+          "expectedApproach": {
+            "type": "string",
+            "example": "Use fs.readFile() to read the file, split the content by newline characters, and count the number of elements in the resulting array. Handle errors using try-catch blocks.",
+            "description": "Suggested approach to solve the problem"
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "medium",
+            "description": "Difficulty level of the coding question"
+          }
+        },
+        "required": [
+          "title",
+          "problem",
+          "constraints",
+          "sampleInput",
+          "sampleOutput",
+          "expectedApproach",
+          "difficulty"
+        ]
+      },
+      "GenerateAssessmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "mcqs": {
+            "description": "List of generated MCQ questions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McqDto"
+            }
+          },
+          "coding": {
+            "description": "List of generated coding questions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CodingQuestionDto"
+            }
+          }
+        },
+        "required": [
+          "mcqs",
+          "coding"
+        ]
+      },
+      "InterviewHistoryDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "example": "What is virtual DOM?",
+            "description": "Previously asked interview question"
+          },
+          "answer": {
+            "type": "string",
+            "example": "It is a lightweight copy of real DOM",
+            "description": "Candidate answer for the question"
+          }
+        },
+        "required": [
+          "question",
+          "answer"
+        ]
+      },
+      "ProcessInterviewDto": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "example": "React",
+            "description": "Interview topic or technology"
+          },
+          "history": {
+            "description": "Previous interview questions and answers",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewHistoryDto"
+            }
+          },
+          "latestAnswer": {
+            "type": "string",
+            "example": "React compares changes efficiently before updating DOM.",
+            "description": "Latest answer provided by the candidate"
+          }
+        },
+        "required": [
+          "topic",
+          "history",
+          "latestAnswer"
+        ]
+      },
+      "EvaluationDto": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "example": 3,
+            "description": "Score given to the latest answer"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 70,
+            "description": "Confidence percentage of the evaluation"
+          },
+          "strengths": {
+            "example": [
+              "Understands basic concept of virtual DOM"
+            ],
+            "description": "Strong points identified in the answer",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weaknesses": {
+            "example": [
+              "Lacks detail on how React optimizes updates"
+            ],
+            "description": "Areas where the answer needs improvement",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "score",
+          "confidence",
+          "strengths",
+          "weaknesses"
+        ]
+      },
+      "NextQuestionDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "example": "How does React optimize the process of updating the real DOM when state or props change?",
+            "description": "Next interview question generated for the candidate"
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "medium",
+            "description": "Difficulty level of the next question"
+          },
+          "focusArea": {
+            "type": "string",
+            "example": "React's optimization techniques",
+            "description": "Topic focus area for the next question"
+          }
+        },
+        "required": [
+          "question",
+          "difficulty",
+          "focusArea"
+        ]
+      },
+      "ProcessInterviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "evaluation": {
+            "$ref": "#/components/schemas/EvaluationDto"
+          },
+          "nextQuestion": {
+            "$ref": "#/components/schemas/NextQuestionDto"
+          }
+        },
+        "required": [
+          "evaluation",
+          "nextQuestion"
         ]
       }
     }
