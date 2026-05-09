@@ -24,7 +24,9 @@ export class JwtAuthGuard {
       request.user = payload; // attach user
       return true;
     } catch (err) {
-      throw new UnauthorizedException('Invalid token');
+      console.error("error:", err);
+      
+      throw new UnauthorizedException('Invalid token', err);
     }
   }
 }

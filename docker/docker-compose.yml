@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
-    container_name: ai-eval-postgres
+    container_name: ai-eval-db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -18,7 +18,7 @@ services:
 
   postgres-test:
     image: postgres:15
-    container_name: ai-eval-postgres-test
+    container_name: ai-eval-db-test
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -31,9 +31,37 @@ services:
     networks:
       - ai-network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+
+    ports:
+      - '11434:11434'
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+    restart: unless-stopped
+
+  ollama-init:
+    image: ollama/ollama:latest
+
+    depends_on:
+      - ollama
+
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      ollama pull qwen2.5:7b;
+      "
+
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+
 volumes:
   postgres_data:
   postgres_test_data:
+  ollama_data:
 
 networks:
   ai-network:

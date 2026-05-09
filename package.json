@@ -25,7 +25,16 @@
     "migrate:prod": "prisma migrate deploy",
     "migrate:test": "dotenv -e .env.test -- prisma migrate deploy",
     "migrate:reset:test": "dotenv -e .env.test -- prisma migrate reset --force",
-    "prepare": "husky"
+    "prepare": "husky",
+    "ai:start": "docker compose -f docker/docker-compose.yml up -d",
+    "ai:stop": "docker compose -f docker/docker-compose.yml down",
+    "ai:restart": "docker compose -f docker/docker-compose.yml restart",
+    "ai:logs": "docker compose -f docker/docker-compose.yml logs -f",
+    "ai:status": "docker compose -f docker/docker-compose.yml ps",
+    "ai:pull-7b": "docker exec -it ollama ollama pull qwen2.5:7b",
+    "ai:pull-14b": "docker exec -it ollama ollama pull qwen2.5:14b",
+    "ai:list-models": "docker exec -it ollama ollama list",
+    "ai:shell": "docker exec -it ollama bash"
   },
   "lint-staged": {
     "*.ts": [
