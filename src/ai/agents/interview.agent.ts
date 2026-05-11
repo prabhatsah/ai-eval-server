@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AiService } from '../ai.service';
+import { OpenAiService } from '../open-ai.service';
 
 import { InterviewInput, InterviewResult } from '../types/interview.types';
 
@@ -9,7 +10,7 @@ import { parseJsonSafely } from '../parsers/json.parser';
 
 @Injectable()
 export class InterviewAgent {
-  constructor(private readonly aiService: AiService) {}
+  constructor(private readonly aiService: OpenAiService) {}
 
   async processInterview(input: InterviewInput): Promise<InterviewResult> {
     const prompt = buildInterviewPrompt(input);

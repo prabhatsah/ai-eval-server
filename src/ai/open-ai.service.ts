@@ -9,6 +9,15 @@ export class OpenAiService {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
+  async generate(prompt: string): Promise<string> {
+    const response = this.openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    return (await response).choices?.[0]?.message?.content ?? '';
+  }
+
   async evaluateAnswer(
     question: string,
     answer: string,
