@@ -7,10 +7,11 @@ import { InterviewInput, InterviewResult } from '../types/interview.types';
 import { buildInterviewPrompt } from '../prompts/interview.prompt';
 
 import { parseJsonSafely } from '../parsers/json.parser';
+import { GeminiService } from '../gemini-ai.service';
 
 @Injectable()
 export class InterviewAgent {
-  constructor(private readonly aiService: OpenAiService) {}
+  constructor(private readonly aiService: GeminiService) {}
 
   async processInterview(input: InterviewInput): Promise<InterviewResult> {
     const prompt = buildInterviewPrompt(input);

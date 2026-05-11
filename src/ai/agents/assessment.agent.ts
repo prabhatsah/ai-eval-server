@@ -41,7 +41,7 @@ export class AssessmentAgent {
   ): Promise<AssessmentResult> {
     const prompt = buildAssessmentPrompt(input);
 
-    let retries = 3;
+    let retries = 1;
 
     while (retries > 0) {
       try {
