@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { AiService } from '../ai.service';
+import { OpenAiService } from '../open-ai.service';
 import {
   AssessmentPromptInput,
   buildAssessmentPrompt,
 } from '../prompts/assessment.prompt';
 
 import { parseJsonSafely } from '../parsers/json.parser';
+import { GeminiService } from '../gemini-ai.service';
 
 export interface McqQuestion {
   question: string;
@@ -32,7 +34,7 @@ export interface AssessmentResult {
 
 @Injectable()
 export class AssessmentAgent {
-  constructor(private readonly aiService: AiService) {}
+  constructor(private readonly aiService: GeminiService) {}
 
   async generateAssessment(
     input: AssessmentPromptInput,
