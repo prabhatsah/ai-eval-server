@@ -35,7 +35,8 @@
     "ai:pull-7b": "docker exec -it ollama ollama pull qwen2.5:7b",
     "ai:pull-14b": "docker exec -it ollama ollama pull qwen2.5:14b",
     "ai:list-models": "docker exec -it ollama ollama list",
-    "ai:shell": "docker exec -it ollama bash"
+    "ai:shell": "docker exec -it ollama bash",
+    "prisma-build": "prisma migrate deploy && prisma generate && npm run build"
   },
   "lint-staged": {
     "*.ts": [
