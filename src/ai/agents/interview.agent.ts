@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 
 import { InterviewInput, InterviewResult } from '../types/interview.types';
 
@@ -17,7 +17,7 @@ export class InterviewAgent {
   ): Promise<InterviewResult> {
     const prompt = buildInterviewPrompt(input);
 
-    let retries = 3;
+    let retries = 1;
 
     while (retries > 0) {
       try {
@@ -27,6 +27,14 @@ export class InterviewAgent {
 
         return parsed;
       } catch (error) {
+        /**
+         * If already a NestJS HTTP exception,
+         * rethrow immediately
+         */
+        if (error instanceof HttpException) {
+          throw error;
+        }
+
         retries--;
 
         if (retries === 0) {

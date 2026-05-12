@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import {
   AssessmentPromptInput,
   buildAssessmentPrompt,
@@ -50,14 +50,22 @@ export class AssessmentAgent {
 
         return parsed;
       } catch (error) {
+        /**
+         * If already a NestJS HTTP exception,
+         * rethrow immediately
+         */
+        if (error instanceof HttpException) {
+          throw error;
+        }
+
         retries--;
 
         if (retries === 0) {
-          throw new Error('Failed to generate valid assessment');
+          throw new Error('Failed to process assessment generation');
         }
       }
     }
 
-    throw new Error('Unexpected error');
+    throw new Error('Unexpected assessment error');
   }
 }
