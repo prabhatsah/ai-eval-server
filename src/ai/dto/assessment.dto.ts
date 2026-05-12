@@ -15,7 +15,7 @@ export class GenerateAssessmentDto {
     example: 'medium',
     description: 'Difficulty level of the assessment',
   })
-  difficulty: string;
+  difficulty: 'easy' | 'medium' | 'hard';
 
   @ApiProperty({
     example: 1,
