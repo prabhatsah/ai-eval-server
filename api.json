@@ -297,6 +297,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Error response structure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Generate MCQ and coding assessment questions",
@@ -336,6 +346,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProcessInterviewResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response structure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseDto"
                 }
               }
             }
@@ -664,6 +684,50 @@
         "required": [
           "mcqs",
           "coding"
+        ]
+      },
+      "ApiErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "example": "Gemini API key is missing"
+          },
+          "errors": {
+            "type": "object",
+            "example": null,
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "example": null,
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-05-12T17:15:00.000Z"
+          },
+          "path": {
+            "type": "string",
+            "example": "/ai/generate-assessment"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "errors",
+          "details",
+          "timestamp",
+          "path"
         ]
       },
       "InterviewHistoryDto": {

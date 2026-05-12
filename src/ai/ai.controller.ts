@@ -22,6 +22,7 @@ import {
   GenerateAssessmentDto,
   GenerateAssessmentResponseDto,
 } from './dto/assessment.dto';
+import { ApiCommonErrorResponses } from 'src/common/decorators/api-common-error-responses.decorator';
 
 @ApiTags('Assessment')
 @Controller('ai')
@@ -48,11 +49,12 @@ export class AiController {
     description: 'Assessment generated successfully',
     type: GenerateAssessmentResponseDto,
   })
+  @ApiCommonErrorResponses()
   async generateAssessment(
     @Body() body: GenerateAssessmentDto,
     @Headers('x-gemini-api-key') apiKey?: string,
   ) {
-    const finalApiKey = apiKey || process.env.GEMINI_API_KEY;
+    const finalApiKey = apiKey; //|| process.env.GEMINI_API_KEY;
 
     if (!finalApiKey) {
       throw new BadRequestException('Gemini API key is missing');
@@ -87,11 +89,12 @@ export class AiController {
       'Interview evaluation and next question generated successfully',
     type: ProcessInterviewResponseDto,
   })
+  @ApiCommonErrorResponses()
   async processInterview(
     @Body() body: ProcessInterviewDto,
     @Headers('x-gemini-api-key') apiKey?: string,
   ) {
-    const finalApiKey = apiKey || process.env.GEMINI_API_KEY;
+    const finalApiKey = apiKey; //|| process.env.GEMINI_API_KEY;
 
     if (!finalApiKey) {
       throw new BadRequestException('Gemini API key is missing');
