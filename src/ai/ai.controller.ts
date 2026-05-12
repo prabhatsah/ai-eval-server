@@ -1,7 +1,19 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Headers,
+  Post,
+} from '@nestjs/common';
 import { AssessmentAgent } from './agents/assessment.agent';
 import { InterviewAgent } from './agents/interview.agent';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   ProcessInterviewDto,
   ProcessInterviewResponseDto,
@@ -23,6 +35,11 @@ export class AiController {
   @ApiOperation({
     summary: 'Generate MCQ and coding assessment questions',
   })
+  @ApiHeader({
+    name: 'x-gemini-api-key',
+    description: 'Gemini API Key',
+    required: false,
+  })
   @ApiBody({
     type: GenerateAssessmentDto,
   })
@@ -31,18 +48,35 @@ export class AiController {
     description: 'Assessment generated successfully',
     type: GenerateAssessmentResponseDto,
   })
-  async generateAssessment(@Body() body: any) {
-    return this.assessmentAgent.generateAssessment({
-      topic: body.topic,
-      difficulty: body.difficulty,
-      mcqCount: body.mcqCount,
-      codingCount: body.codingCount,
-    });
+  async generateAssessment(
+    @Body() body: GenerateAssessmentDto,
+    @Headers('x-gemini-api-key') apiKey?: string,
+  ) {
+    const finalApiKey = apiKey || process.env.GEMINI_API_KEY;
+
+    if (!finalApiKey) {
+      throw new BadRequestException('Gemini API key is missing');
+    }
+
+    return this.assessmentAgent.generateAssessment(
+      {
+        topic: body.topic,
+        difficulty: body.difficulty,
+        mcqCount: body.mcqCount,
+        codingCount: body.codingCount,
+      },
+      finalApiKey,
+    );
   }
 
   @Post('interview')
   @ApiOperation({
     summary: 'Process interview answer and generate next question',
+  })
+  @ApiHeader({
+    name: 'x-gemini-api-key',
+    description: 'Gemini API Key',
+    required: false,
   })
   @ApiBody({
     type: ProcessInterviewDto,
@@ -53,11 +87,23 @@ export class AiController {
       'Interview evaluation and next question generated successfully',
     type: ProcessInterviewResponseDto,
   })
-  async processInterview(@Body() body: any) {
-    return this.interviewAgent.processInterview({
-      topic: body.topic,
-      history: body.history,
-      latestAnswer: body.latestAnswer,
-    });
+  async processInterview(
+    @Body() body: ProcessInterviewDto,
+    @Headers('x-gemini-api-key') apiKey?: string,
+  ) {
+    const finalApiKey = apiKey || process.env.GEMINI_API_KEY;
+
+    if (!finalApiKey) {
+      throw new BadRequestException('Gemini API key is missing');
+    }
+
+    return this.interviewAgent.processInterview(
+      {
+        topic: body.topic,
+        history: body.history,
+        latestAnswer: body.latestAnswer,
+      },
+      finalApiKey,
+    );
   }
 }

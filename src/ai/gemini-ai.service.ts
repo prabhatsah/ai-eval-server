@@ -5,19 +5,23 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export class GeminiService {
   private readonly genAI: GoogleGenerativeAI;
 
-  constructor() {
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  }
+  // constructor() {
+  //   this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+  // }
 
-  async generate(prompt: string): Promise<string> {
+  async generate(prompt: string, apiKey: string): Promise<string> {
     try {
-      const model = this.genAI.getGenerativeModel({
+      console.log('apiKey:', apiKey);
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+
+      const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
       });
 
       const result = await model.generateContent(prompt);
 
-      const response = await result.response;
+      const response = result.response;
 
       return response.text();
     } catch (error) {

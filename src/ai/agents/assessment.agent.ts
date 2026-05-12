@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { AiService } from '../ai.service';
-import { OpenAiService } from '../open-ai.service';
 import {
   AssessmentPromptInput,
   buildAssessmentPrompt,
@@ -38,6 +36,7 @@ export class AssessmentAgent {
 
   async generateAssessment(
     input: AssessmentPromptInput,
+    apiKey: string,
   ): Promise<AssessmentResult> {
     const prompt = buildAssessmentPrompt(input);
 
@@ -45,7 +44,7 @@ export class AssessmentAgent {
 
     while (retries > 0) {
       try {
-        const rawResponse = await this.aiService.generate(prompt);
+        const rawResponse = await this.aiService.generate(prompt, apiKey);
 
         const parsed = parseJsonSafely<AssessmentResult>(rawResponse);
 

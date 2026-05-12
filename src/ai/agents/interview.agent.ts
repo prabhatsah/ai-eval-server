@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { AiService } from '../ai.service';
-import { OpenAiService } from '../open-ai.service';
 
 import { InterviewInput, InterviewResult } from '../types/interview.types';
 
@@ -13,14 +11,17 @@ import { GeminiService } from '../gemini-ai.service';
 export class InterviewAgent {
   constructor(private readonly aiService: GeminiService) {}
 
-  async processInterview(input: InterviewInput): Promise<InterviewResult> {
+  async processInterview(
+    input: InterviewInput,
+    apiKey: string,
+  ): Promise<InterviewResult> {
     const prompt = buildInterviewPrompt(input);
 
     let retries = 3;
 
     while (retries > 0) {
       try {
-        const rawResponse = await this.aiService.generate(prompt);
+        const rawResponse = await this.aiService.generate(prompt, apiKey);
 
         const parsed = parseJsonSafely<InterviewResult>(rawResponse);
 

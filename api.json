@@ -266,7 +266,17 @@
     "/ai/generate-assessment": {
       "post": {
         "operationId": "AiController_generateAssessment",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-gemini-api-key",
+            "required": false,
+            "in": "header",
+            "description": "Gemini API Key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -298,7 +308,17 @@
     "/ai/interview": {
       "post": {
         "operationId": "AiController_processInterview",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-gemini-api-key",
+            "required": false,
+            "in": "header",
+            "description": "Gemini API Key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
