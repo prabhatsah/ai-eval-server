@@ -8,6 +8,10 @@ import cookieParser from 'cookie-parser';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set in .env');
+  }
+
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({

@@ -6,28 +6,61 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class GenerateAssessmentDto {
   @ApiProperty({
-    example: 'Node',
-    description: 'Technology or topic for the assessment',
+    example: 'Backend Engineer',
+    description: 'Target role for the assessment',
   })
-  topic: string;
+  role: string;
+
+  @ApiProperty({
+    example: ['Node.js', 'SQL', 'REST APIs'],
+    description: 'Primary skills that must be covered in the assessment',
+    type: [String],
+  })
+  primarySkills: string[];
+
+  @ApiProperty({
+    example: ['Docker', 'Redis'],
+    description: 'Optional secondary skills',
+    type: [String],
+    required: false,
+  })
+  secondarySkills?: string[];
+
+  @ApiProperty({
+    example: 3,
+    description: 'Years of experience of the candidate',
+    required: false,
+  })
+  experienceYears?: number;
 
   @ApiProperty({
     example: 'medium',
     description: 'Difficulty level of the assessment',
+    enum: ['easy', 'medium', 'hard'],
   })
   difficulty: 'easy' | 'medium' | 'hard';
 
   @ApiProperty({
-    example: 1,
-    description: 'Number of MCQ questions to generate',
+    example: 10,
+    description: 'Number of MCQ questions (default = 10)',
+    required: false,
   })
   mcqCount: number;
 
   @ApiProperty({
     example: 1,
-    description: 'Number of coding questions to generate',
+    description: 'Number of coding questions (default = 1)',
+    required: false,
   })
   codingCount: number;
+
+  @ApiProperty({
+    example: ['API design', 'database optimization'],
+    description: 'Focus areas for question generation',
+    type: [String],
+    required: false,
+  })
+  focusAreas?: string[];
 }
 
 /* =========================
@@ -37,19 +70,26 @@ export class GenerateAssessmentDto {
 export class McqDto {
   @ApiProperty({
     example:
-      'Which of the following is a correct way to import a module in Node.js?',
+      'A Node.js API intermittently returns 500 errors under load. What is the most likely cause?',
     description: 'MCQ question',
   })
   question: string;
 
   @ApiProperty({
+    example: 'Node.js',
+    description: 'Skill this question belongs to',
+  })
+  skill: string;
+
+  @ApiProperty({
     example: [
-      "A) require('module-name');",
-      "B) import 'module-name';",
-      "C) include 'module-name';",
-      "D) use 'module-name';",
+      'A) Event loop blocking due to sync code',
+      'B) DNS lookup failure',
+      'C) Incorrect HTTP method',
+      'D) Missing environment variables',
     ],
     description: 'Available answer options',
+    type: [String],
   })
   options: string[];
 
@@ -67,7 +107,7 @@ export class McqDto {
 
   @ApiProperty({
     example:
-      'In Node.js, the `require` function is used to load and return the exports of a module. The other options are not valid syntax for importing modules in Node.js.',
+      'Synchronous operations block the event loop, causing request handling delays and failures under load.',
     description: 'Explanation of the correct answer',
   })
   explanation: string;
@@ -75,40 +115,40 @@ export class McqDto {
 
 export class CodingQuestionDto {
   @ApiProperty({
-    example: 'File Reader',
+    example: 'Build a Rate-Limited API Endpoint',
     description: 'Title of the coding problem',
   })
   title: string;
 
   @ApiProperty({
     example:
-      'Write a Node.js program that reads a file from disk, counts the number of lines, and prints the total line count to the console. The path to the file will be provided as an argument when running the script.',
+      'Design a REST API endpoint in Node.js that limits requests per user to 100 requests per minute. Exceeding requests should return HTTP 429.',
     description: 'Detailed coding problem statement',
   })
   problem: string;
 
   @ApiProperty({
     example:
-      'The solution should handle errors gracefully and not crash if the file does not exist or is unreadable. Assume the file contains only text data with newlines separating each line.',
+      'The solution must handle concurrent users efficiently. Avoid in-memory-only solutions for scalability.',
     description: 'Constraints for solving the problem',
   })
   constraints: string;
 
   @ApiProperty({
-    example: './path/to/file.txt',
+    example: 'User sends 120 requests in 1 minute',
     description: 'Sample input for the coding problem',
   })
   sampleInput: string;
 
   @ApiProperty({
-    example: 'Total lines: 100',
+    example: 'First 100 requests succeed, next 20 return 429',
     description: 'Expected sample output',
   })
   sampleOutput: string;
 
   @ApiProperty({
     example:
-      'Use fs.readFile() to read the file, split the content by newline characters, and count the number of elements in the resulting array. Handle errors using try-catch blocks.',
+      'Use middleware with Redis to track request counts per user and reset using expiration policies.',
     description: 'Suggested approach to solve the problem',
   })
   expectedApproach: string;

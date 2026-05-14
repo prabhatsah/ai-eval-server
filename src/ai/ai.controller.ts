@@ -6,7 +6,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { AssessmentAgent } from './agents/assessment.agent';
-import { InterviewAgent } from './agents/interview.agent';
+//import { InterviewAgent } from './agents/interview.agent';
 import {
   ApiBody,
   ApiHeader,
@@ -29,7 +29,7 @@ import { ApiCommonErrorResponses } from 'src/common/decorators/api-common-error-
 export class AiController {
   constructor(
     private readonly assessmentAgent: AssessmentAgent,
-    private readonly interviewAgent: InterviewAgent,
+    //private readonly interviewAgent: InterviewAgent,
   ) {}
 
   @Post('generate-assessment')
@@ -37,8 +37,8 @@ export class AiController {
     summary: 'Generate MCQ and coding assessment questions',
   })
   @ApiHeader({
-    name: 'x-gemini-api-key',
-    description: 'Gemini API Key',
+    name: 'x-api-key',
+    description: 'API Key',
     required: false,
   })
   @ApiBody({
@@ -52,61 +52,58 @@ export class AiController {
   @ApiCommonErrorResponses()
   async generateAssessment(
     @Body() body: GenerateAssessmentDto,
-    @Headers('x-gemini-api-key') apiKey?: string,
+    @Headers('x-api-key') apiKey?: string,
   ) {
-    const finalApiKey = apiKey; //|| process.env.GEMINI_API_KEY;
-
-    if (!finalApiKey) {
-      throw new BadRequestException('Gemini API key is missing');
+    if (!apiKey) {
+      throw new BadRequestException('API key is missing');
     }
 
     return this.assessmentAgent.generateAssessment(
       {
-        topic: body.topic,
-        difficulty: body.difficulty,
-        mcqCount: body.mcqCount,
-        codingCount: body.codingCount,
+        ...body,
+        mcqCount: body.mcqCount ?? 10,
+        codingCount: body.codingCount ?? 1,
       },
-      finalApiKey,
+      apiKey,
     );
   }
 
-  @Post('interview')
-  @ApiOperation({
-    summary: 'Process interview answer and generate next question',
-  })
-  @ApiHeader({
-    name: 'x-gemini-api-key',
-    description: 'Gemini API Key',
-    required: false,
-  })
-  @ApiBody({
-    type: ProcessInterviewDto,
-  })
-  @ApiResponse({
-    status: 200,
-    description:
-      'Interview evaluation and next question generated successfully',
-    type: ProcessInterviewResponseDto,
-  })
-  @ApiCommonErrorResponses()
-  async processInterview(
-    @Body() body: ProcessInterviewDto,
-    @Headers('x-gemini-api-key') apiKey?: string,
-  ) {
-    const finalApiKey = apiKey; //|| process.env.GEMINI_API_KEY;
+  // @Post('interview')
+  // @ApiOperation({
+  //   summary: 'Process interview answer and generate next question',
+  // })
+  // @ApiHeader({
+  //   name: 'x-gemini-api-key',
+  //   description: 'Gemini API Key',
+  //   required: false,
+  // })
+  // @ApiBody({
+  //   type: ProcessInterviewDto,
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description:
+  //     'Interview evaluation and next question generated successfully',
+  //   type: ProcessInterviewResponseDto,
+  // })
+  // @ApiCommonErrorResponses()
+  // async processInterview(
+  //   @Body() body: ProcessInterviewDto,
+  //   @Headers('x-gemini-api-key') apiKey?: string,
+  // ) {
+  //   const finalApiKey = apiKey; //|| process.env.GEMINI_API_KEY;
 
-    if (!finalApiKey) {
-      throw new BadRequestException('Gemini API key is missing');
-    }
+  //   if (!finalApiKey) {
+  //     throw new BadRequestException('Gemini API key is missing');
+  //   }
 
-    return this.interviewAgent.processInterview(
-      {
-        topic: body.topic,
-        history: body.history,
-        latestAnswer: body.latestAnswer,
-      },
-      finalApiKey,
-    );
-  }
+  //   return this.interviewAgent.processInterview(
+  //     {
+  //       topic: body.topic,
+  //       history: body.history,
+  //       latestAnswer: body.latestAnswer,
+  //     },
+  //     finalApiKey,
+  //   );
+  // }
 }

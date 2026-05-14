@@ -268,10 +268,10 @@
         "operationId": "AiController_generateAssessment",
         "parameters": [
           {
-            "name": "x-gemini-api-key",
+            "name": "x-api-key",
             "required": false,
             "in": "header",
-            "description": "Gemini API Key",
+            "description": "API Key",
             "schema": {
               "type": "string"
             }
@@ -310,58 +310,6 @@
           }
         },
         "summary": "Generate MCQ and coding assessment questions",
-        "tags": [
-          "Assessment"
-        ]
-      }
-    },
-    "/ai/interview": {
-      "post": {
-        "operationId": "AiController_processInterview",
-        "parameters": [
-          {
-            "name": "x-gemini-api-key",
-            "required": false,
-            "in": "header",
-            "description": "Gemini API Key",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProcessInterviewDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Interview evaluation and next question generated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProcessInterviewResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error response structure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiErrorResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Process interview answer and generate next question",
         "tags": [
           "Assessment"
         ]
@@ -541,32 +489,75 @@
       "GenerateAssessmentDto": {
         "type": "object",
         "properties": {
-          "topic": {
+          "role": {
             "type": "string",
-            "example": "Node",
-            "description": "Technology or topic for the assessment"
+            "example": "Backend Engineer",
+            "description": "Target role for the assessment"
+          },
+          "primarySkills": {
+            "example": [
+              "Node.js",
+              "SQL",
+              "REST APIs"
+            ],
+            "description": "Primary skills that must be covered in the assessment",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "secondarySkills": {
+            "example": [
+              "Docker",
+              "Redis"
+            ],
+            "description": "Optional secondary skills",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experienceYears": {
+            "type": "number",
+            "example": 3,
+            "description": "Years of experience of the candidate"
           },
           "difficulty": {
             "type": "string",
             "example": "medium",
-            "description": "Difficulty level of the assessment"
+            "description": "Difficulty level of the assessment",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ]
           },
           "mcqCount": {
             "type": "number",
-            "example": 1,
-            "description": "Number of MCQ questions to generate"
+            "example": 10,
+            "description": "Number of MCQ questions (default = 10)"
           },
           "codingCount": {
             "type": "number",
             "example": 1,
-            "description": "Number of coding questions to generate"
+            "description": "Number of coding questions (default = 1)"
+          },
+          "focusAreas": {
+            "example": [
+              "API design",
+              "database optimization"
+            ],
+            "description": "Focus areas for question generation",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "topic",
-          "difficulty",
-          "mcqCount",
-          "codingCount"
+          "role",
+          "primarySkills",
+          "difficulty"
         ]
       },
       "McqDto": {
@@ -574,15 +565,20 @@
         "properties": {
           "question": {
             "type": "string",
-            "example": "Which of the following is a correct way to import a module in Node.js?",
+            "example": "A Node.js API intermittently returns 500 errors under load. What is the most likely cause?",
             "description": "MCQ question"
+          },
+          "skill": {
+            "type": "string",
+            "example": "Node.js",
+            "description": "Skill this question belongs to"
           },
           "options": {
             "example": [
-              "A) require('module-name');",
-              "B) import 'module-name';",
-              "C) include 'module-name';",
-              "D) use 'module-name';"
+              "A) Event loop blocking due to sync code",
+              "B) DNS lookup failure",
+              "C) Incorrect HTTP method",
+              "D) Missing environment variables"
             ],
             "description": "Available answer options",
             "type": "array",
@@ -602,12 +598,13 @@
           },
           "explanation": {
             "type": "string",
-            "example": "In Node.js, the `require` function is used to load and return the exports of a module. The other options are not valid syntax for importing modules in Node.js.",
+            "example": "Synchronous operations block the event loop, causing request handling delays and failures under load.",
             "description": "Explanation of the correct answer"
           }
         },
         "required": [
           "question",
+          "skill",
           "options",
           "correctAnswer",
           "difficulty",
@@ -619,32 +616,32 @@
         "properties": {
           "title": {
             "type": "string",
-            "example": "File Reader",
+            "example": "Build a Rate-Limited API Endpoint",
             "description": "Title of the coding problem"
           },
           "problem": {
             "type": "string",
-            "example": "Write a Node.js program that reads a file from disk, counts the number of lines, and prints the total line count to the console. The path to the file will be provided as an argument when running the script.",
+            "example": "Design a REST API endpoint in Node.js that limits requests per user to 100 requests per minute. Exceeding requests should return HTTP 429.",
             "description": "Detailed coding problem statement"
           },
           "constraints": {
             "type": "string",
-            "example": "The solution should handle errors gracefully and not crash if the file does not exist or is unreadable. Assume the file contains only text data with newlines separating each line.",
+            "example": "The solution must handle concurrent users efficiently. Avoid in-memory-only solutions for scalability.",
             "description": "Constraints for solving the problem"
           },
           "sampleInput": {
             "type": "string",
-            "example": "./path/to/file.txt",
+            "example": "User sends 120 requests in 1 minute",
             "description": "Sample input for the coding problem"
           },
           "sampleOutput": {
             "type": "string",
-            "example": "Total lines: 100",
+            "example": "First 100 requests succeed, next 20 return 429",
             "description": "Expected sample output"
           },
           "expectedApproach": {
             "type": "string",
-            "example": "Use fs.readFile() to read the file, split the content by newline characters, and count the number of elements in the resulting array. Handle errors using try-catch blocks.",
+            "example": "Use middleware with Redis to track request counts per user and reset using expiration policies.",
             "description": "Suggested approach to solve the problem"
           },
           "difficulty": {
@@ -728,133 +725,6 @@
           "details",
           "timestamp",
           "path"
-        ]
-      },
-      "InterviewHistoryDto": {
-        "type": "object",
-        "properties": {
-          "question": {
-            "type": "string",
-            "example": "What is virtual DOM?",
-            "description": "Previously asked interview question"
-          },
-          "answer": {
-            "type": "string",
-            "example": "It is a lightweight copy of real DOM",
-            "description": "Candidate answer for the question"
-          }
-        },
-        "required": [
-          "question",
-          "answer"
-        ]
-      },
-      "ProcessInterviewDto": {
-        "type": "object",
-        "properties": {
-          "topic": {
-            "type": "string",
-            "example": "React",
-            "description": "Interview topic or technology"
-          },
-          "history": {
-            "description": "Previous interview questions and answers",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InterviewHistoryDto"
-            }
-          },
-          "latestAnswer": {
-            "type": "string",
-            "example": "React compares changes efficiently before updating DOM.",
-            "description": "Latest answer provided by the candidate"
-          }
-        },
-        "required": [
-          "topic",
-          "history",
-          "latestAnswer"
-        ]
-      },
-      "EvaluationDto": {
-        "type": "object",
-        "properties": {
-          "score": {
-            "type": "number",
-            "example": 3,
-            "description": "Score given to the latest answer"
-          },
-          "confidence": {
-            "type": "number",
-            "example": 70,
-            "description": "Confidence percentage of the evaluation"
-          },
-          "strengths": {
-            "example": [
-              "Understands basic concept of virtual DOM"
-            ],
-            "description": "Strong points identified in the answer",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "weaknesses": {
-            "example": [
-              "Lacks detail on how React optimizes updates"
-            ],
-            "description": "Areas where the answer needs improvement",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "score",
-          "confidence",
-          "strengths",
-          "weaknesses"
-        ]
-      },
-      "NextQuestionDto": {
-        "type": "object",
-        "properties": {
-          "question": {
-            "type": "string",
-            "example": "How does React optimize the process of updating the real DOM when state or props change?",
-            "description": "Next interview question generated for the candidate"
-          },
-          "difficulty": {
-            "type": "string",
-            "example": "medium",
-            "description": "Difficulty level of the next question"
-          },
-          "focusArea": {
-            "type": "string",
-            "example": "React's optimization techniques",
-            "description": "Topic focus area for the next question"
-          }
-        },
-        "required": [
-          "question",
-          "difficulty",
-          "focusArea"
-        ]
-      },
-      "ProcessInterviewResponseDto": {
-        "type": "object",
-        "properties": {
-          "evaluation": {
-            "$ref": "#/components/schemas/EvaluationDto"
-          },
-          "nextQuestion": {
-            "$ref": "#/components/schemas/NextQuestionDto"
-          }
-        },
-        "required": [
-          "evaluation",
-          "nextQuestion"
         ]
       }
     }

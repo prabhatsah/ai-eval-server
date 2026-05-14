@@ -1,7 +1,16 @@
-export const parseJsonSafely = <T>(text: string): T => {
+import { z, ZodType } from 'zod';
+
+export function parseJsonSafely<T>(raw: string, schema: ZodType<T>): T {
   try {
-    return JSON.parse(text) as T;
+    const cleaned = raw
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    return schema.parse(parsed); //
   } catch (error) {
-    throw new Error('Invalid AI JSON response');
+    throw new Error('Invalid JSON or schema mismatch');
   }
-};
+}
