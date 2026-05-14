@@ -29,7 +29,7 @@ export class GeminiService {
 
       const result = await model.generateContent(prompt);
 
-      const response = result.response;
+      const response = result.response;//test
 
       return response.text();
     } catch (error: any) {
