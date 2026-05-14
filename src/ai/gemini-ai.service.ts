@@ -13,7 +13,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 @Injectable()
 export class GeminiService {
-  private readonly genAI: GoogleGenerativeAI;
+  //private readonly genAI: GoogleGenerativeAI;
 
   // constructor() {
   //   this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -21,17 +21,29 @@ export class GeminiService {
 
   async generate(prompt: string, apiKey: string): Promise<string> {
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+      const res = await fetch('https://ai-proxy-lxs4.onrender.com/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          provider: 'openai',
+          prompt: prompt,
+        }),
       });
 
-      const result = await model.generateContent(prompt);
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Error ${res.status}: ${err}`);
+      }
 
-      const response = result.response;//test
+      const data = await res.json();
 
-      return response.text();
+      //   console.log('response:', data);
+      console.log('res:', data.response);
+
+      return data.response;
     } catch (error: any) {
       console.log('error:', error);
 

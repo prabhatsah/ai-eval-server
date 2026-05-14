@@ -1,44 +1,28 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import {
-  AssessmentPromptInput,
-  buildAssessmentPrompt,
-} from '../prompts/assessment.prompt';
+import { buildAssessmentPrompt } from '../prompts/assessment.prompt';
 
 import { parseJsonSafely } from '../parsers/json.parser';
 import { GeminiService } from '../gemini-ai.service';
 
-export interface McqQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  difficulty: string;
-  explanation: string;
-}
-
-export interface CodingQuestion {
-  title: string;
-  problem: string;
-  constraints: string;
-  sampleInput: string;
-  sampleOutput: string;
-  expectedApproach: string;
-  difficulty: string;
-}
-
-export interface AssessmentResult {
-  mcqs: McqQuestion[];
-  coding: CodingQuestion[];
-}
+import {
+  AssessmentResultSchema,
+  AssessmentInput,
+  AssessmentResult,
+  AssessmentInputSchema,
+} from '../validators/assessment.schema';
+import { AiService } from '../ai.service';
 
 @Injectable()
 export class AssessmentAgent {
-  constructor(private readonly aiService: GeminiService) {}
+  constructor(private readonly aiService: AiService) {}
 
   async generateAssessment(
-    input: AssessmentPromptInput,
+    input: AssessmentInput,
     apiKey: string,
   ): Promise<AssessmentResult> {
-    const prompt = buildAssessmentPrompt(input);
+    const validatedInput = AssessmentInputSchema.parse(input);
+
+    const prompt = buildAssessmentPrompt(validatedInput);
 
     let retries = 1;
 
@@ -46,7 +30,7 @@ export class AssessmentAgent {
       try {
         const rawResponse = await this.aiService.generate(prompt, apiKey);
 
-        const parsed = parseJsonSafely<AssessmentResult>(rawResponse);
+        const parsed = parseJsonSafely(rawResponse, AssessmentResultSchema);
 
         return parsed;
       } catch (error) {
@@ -61,7 +45,7 @@ export class AssessmentAgent {
         retries--;
 
         if (retries === 0) {
-          throw new Error('Failed to process assessment generation');
+          throw new Error(`Failed after retries: ${error.message}`);
         }
       }
     }
