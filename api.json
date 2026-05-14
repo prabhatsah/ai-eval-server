@@ -314,6 +314,49 @@
           "Assessment"
         ]
       }
+    },
+    "/ai/generate-from-jd": {
+      "post": {
+        "description": "Parses a job description to extract structured hiring signals and generates a complete technical assessment.",
+        "operationId": "AiController_generateFromJd",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "required": false,
+            "in": "header",
+            "description": "API Key for AI provider",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateFromJdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assessment generated successfully from JD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateFromJdResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Generate assessment from job description",
+        "tags": [
+          "Assessment"
+        ]
+      }
     }
   },
   "info": {
@@ -725,6 +768,120 @@
           "details",
           "timestamp",
           "path"
+        ]
+      },
+      "GenerateFromJdDto": {
+        "type": "object",
+        "properties": {
+          "jd": {
+            "type": "string",
+            "example": "We are looking for a Backend Engineer with 3+ years experience in Node.js, SQL, REST APIs. Knowledge of Docker and Redis is a plus.",
+            "description": "Full job description text"
+          },
+          "mcqCount": {
+            "type": "number",
+            "example": 10,
+            "description": "Optional MCQ count (default 10)"
+          },
+          "codingCount": {
+            "type": "number",
+            "example": 1,
+            "description": "Optional coding question count (default 1)"
+          }
+        },
+        "required": [
+          "jd"
+        ]
+      },
+      "ParsedJdDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "example": "Backend Engineer"
+          },
+          "primarySkills": {
+            "example": [
+              "Node.js",
+              "SQL",
+              "REST APIs"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "secondarySkills": {
+            "example": [
+              "Docker",
+              "Redis"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experienceYears": {
+            "type": "number",
+            "example": 3
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "medium"
+          },
+          "mcqCount": {
+            "type": "number",
+            "example": 10
+          },
+          "codingCount": {
+            "type": "number",
+            "example": 1
+          },
+          "focusAreas": {
+            "example": [
+              "API design",
+              "database optimization"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "role",
+          "primarySkills",
+          "secondarySkills",
+          "experienceYears",
+          "difficulty",
+          "mcqCount",
+          "codingCount",
+          "focusAreas"
+        ]
+      },
+      "GenerateFromJdResponseDto": {
+        "type": "object",
+        "properties": {
+          "jd": {
+            "description": "Structured JD data extracted by AI",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ParsedJdDto"
+              }
+            ]
+          },
+          "assessment": {
+            "description": "Generated assessment based on JD",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GenerateAssessmentResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "jd",
+          "assessment"
         ]
       }
     }

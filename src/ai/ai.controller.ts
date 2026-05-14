@@ -23,12 +23,18 @@ import {
   GenerateAssessmentResponseDto,
 } from './dto/assessment.dto';
 import { ApiCommonErrorResponses } from 'src/common/decorators/api-common-error-responses.decorator';
+import {
+  GenerateFromJdDto,
+  GenerateFromJdResponseDto,
+} from './dto/generate-from-jd.dto';
+import { AssessmentOrchestratorService } from './assessment-orchestrator.service';
 
 @ApiTags('Assessment')
 @Controller('ai')
 export class AiController {
   constructor(
     private readonly assessmentAgent: AssessmentAgent,
+    private readonly orchestratorService: AssessmentOrchestratorService,
     //private readonly interviewAgent: InterviewAgent,
   ) {}
 
@@ -66,6 +72,45 @@ export class AiController {
       },
       apiKey,
     );
+  }
+
+  @Post('generate-from-jd')
+  @ApiOperation({
+    summary: 'Generate assessment from job description',
+    description:
+      'Parses a job description to extract structured hiring signals and generates a complete technical assessment.',
+  })
+  @ApiHeader({
+    name: 'x-api-key',
+    description: 'API Key for AI provider',
+    required: false,
+  })
+  @ApiBody({
+    type: GenerateFromJdDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Assessment generated successfully from JD',
+    type: GenerateFromJdResponseDto,
+  })
+  async generateFromJd(
+    @Body() body: GenerateFromJdDto,
+    @Headers('x-api-key') apiKey?: string,
+  ) {
+    const finalApiKey = apiKey;
+
+    if (!finalApiKey) {
+      throw new BadRequestException('API key is missing');
+    }
+
+    if (!body.jd) {
+      throw new BadRequestException('Job description is required');
+    }
+
+    return this.orchestratorService.generateFromJD(body.jd, apiKey, {
+      mcqCount: body.mcqCount,
+      codingCount: body.codingCount,
+    });
   }
 
   // @Post('interview')

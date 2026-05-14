@@ -51,9 +51,9 @@ export const AssessmentInputSchema = z.object({
 
   difficulty: z.enum(['easy', 'medium', 'hard']),
 
-  mcqCount: z.number().default(10),
+  mcqCount: z.number().min(1).max(20).default(10),
 
-  codingCount: z.number().default(1),
+  codingCount: z.number().min(0).max(5).default(1),
 
   focusAreas: z.array(z.string()).optional(),
 });
