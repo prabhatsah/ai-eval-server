@@ -9,7 +9,7 @@ import { mapHttpError } from './mapper/httpError.mapper';
 @Injectable()
 export class AiService {
   private readonly BASE_URL = 'https://ai-proxy-lxs4.onrender.com/ask';
-  private readonly TIMEOUT = 15000; // 15s
+  private readonly TIMEOUT = 105000; // 15s
 
   async generate(prompt: string, apiKey: string): Promise<string> {
     const controller = new AbortController();
