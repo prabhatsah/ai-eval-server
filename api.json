@@ -99,6 +99,67 @@
         ]
       }
     },
+    "/user": {
+      "get": {
+        "operationId": "UserController_getAllUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all users",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "operationId": "UserController_getUserById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Get user by ID",
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/evaluations": {
       "post": {
         "operationId": "EvaluationController_create",
@@ -357,6 +418,117 @@
           "Assessment"
         ]
       }
+    },
+    "/jd": {
+      "post": {
+        "description": "Parses a raw JD and stores structured data in database",
+        "operationId": "JdController_createJd",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "required": false,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JdResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create and parse a job description",
+        "tags": [
+          "Job Description"
+        ]
+      },
+      "get": {
+        "operationId": "JdController_getAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all job descriptions",
+        "tags": [
+          "Job Description"
+        ]
+      }
+    },
+    "/jd/{id}": {
+      "get": {
+        "operationId": "JdController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "JD ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JdResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get job description by ID",
+        "tags": [
+          "Job Description"
+        ]
+      }
+    },
+    "/jd/group/{groupId}": {
+      "get": {
+        "operationId": "JdController_getLatest",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get latest JD by groupId",
+        "tags": [
+          "Job Description"
+        ]
+      }
     }
   },
   "info": {
@@ -395,7 +567,7 @@
             "type": "string",
             "enum": [
               "MANAGER",
-              "EMPLOYEE"
+              "CANDIDATE"
             ],
             "example": "MANAGER"
           }
@@ -422,6 +594,43 @@
         "required": [
           "email",
           "password"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-string"
+          },
+          "name": {
+            "type": "string",
+            "example": "Prabhat Kumar"
+          },
+          "email": {
+            "type": "string",
+            "example": "prabhat@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "MANAGER",
+              "CANDIDATE"
+            ],
+            "example": "MANAGER"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "role",
+          "createdAt"
         ]
       },
       "SectionConfigDto": {
@@ -882,6 +1091,65 @@
         "required": [
           "jd",
           "assessment"
+        ]
+      },
+      "CreateJdDto": {
+        "type": "object",
+        "properties": {
+          "jd": {
+            "type": "string",
+            "example": "We are looking for a Backend Engineer...",
+            "description": "Full job description text"
+          }
+        },
+        "required": [
+          "jd"
+        ]
+      },
+      "JdResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "primarySkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "secondarySkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ]
+          },
+          "experienceYears": {
+            "type": "number"
+          },
+          "focusAreas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "primarySkills",
+          "difficulty"
         ]
       }
     }

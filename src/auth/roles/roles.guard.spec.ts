@@ -32,7 +32,7 @@ describe('RolesGuard', () => {
     const context = {
       switchToHttp: () => ({
         getRequest: () => ({
-          user: { role: 'EMPLOYEE' },
+          user: { role: 'CANDIDATE' },
         }),
       }),
       getHandler: () => handler,

@@ -12,10 +12,25 @@ datasource db {
   provider = "postgresql"
 }
 
+
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
 enum Role {
   MANAGER
-  EMPLOYEE
+  CANDIDATE
 }
+
+//////////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////////
 
 model User {
   id        String   @id @default(uuid())
@@ -30,6 +45,9 @@ model User {
   attempts Attempt[]
 }
 
+//////////////////////////////////////////////////////
+// EVALUATION
+//////////////////////////////////////////////////////
 model Evaluation {
   id        String   @id @default(uuid())
   title     String
@@ -41,6 +59,9 @@ model Evaluation {
   attempts Attempt[]
 }
 
+//////////////////////////////////////////////////////
+// ATTEMPT
+//////////////////////////////////////////////////////
 model Attempt {
   id           String @id @default(uuid())
   userId       String
@@ -61,6 +82,7 @@ model Attempt {
   responses Response[]
 }
 
+
 model Response {
   id        String @id @default(uuid())
   attemptId String
@@ -73,3 +95,124 @@ model Response {
 
   attempt Attempt @relation(fields: [attemptId], references: [id])
 }
+
+//////////////////////////////////////////////////////
+// JOB DESCRIPTION (VERSIONED)
+//////////////////////////////////////////////////////
+
+model JobDescription {
+  id              String   @id @default(uuid())
+
+  // Logical grouping (same JD across versions)
+  jdGroupId       String
+
+  // Versioning
+  version         Int
+
+  // Raw input
+  rawText         String
+
+  // Parsed structured data
+  role            String
+  primarySkills   Json
+  secondarySkills Json?
+  experienceYears Int?
+  difficulty      Difficulty
+  focusAreas      Json?
+
+  isLatest        Boolean   @default(true) // ✅ quick access
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // RELATION
+  assessments     Assessment[]
+
+  @@index([jdGroupId])
+  @@index([isLatest])
+  @@unique([jdGroupId, version]) // prevents duplicate versions
+}
+
+//////////////////////////////////////////////////////
+// ASSESSMENT (SNAPSHOT OF JD VERSION)
+//////////////////////////////////////////////////////
+
+model Assessment {
+  id               String   @id @default(uuid())
+
+  jobDescriptionId String
+  jobDescription   JobDescription @relation(fields: [jobDescriptionId], references: [id])
+
+  // SNAPSHOT (IMPORTANT)
+  role            String
+  difficulty      Difficulty
+  experienceYears Int?
+
+  mcqCount        Int
+  codingCount     Int
+
+  primarySkills   Json
+  secondarySkills Json?
+  focusAreas      Json?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // RELATIONS
+  mcqs            McqQuestion[]
+  codingQuestions CodingQuestion[]
+
+  @@index([role])
+  @@index([difficulty])
+}
+
+//////////////////////////////////////////////////////
+// MCQ QUESTIONS
+//////////////////////////////////////////////////////
+
+model McqQuestion {
+  id            String   @id @default(uuid())
+
+  assessmentId  String
+  assessment    Assessment @relation(fields: [assessmentId], references: [id])
+
+  question      String
+  skill         String?
+
+  options       Json
+  correctAnswer String
+
+  difficulty    Difficulty
+  explanation   String?
+
+  createdAt     DateTime @default(now())
+
+  @@index([assessmentId])
+  @@index([skill])
+}
+
+//////////////////////////////////////////////////////
+// CODING QUESTIONS
+//////////////////////////////////////////////////////
+
+model CodingQuestion {
+  id            String   @id @default(uuid())
+
+  assessmentId  String
+  assessment    Assessment @relation(fields: [assessmentId], references: [id])
+
+  title         String
+  problem       String
+  constraints   String?
+
+  sampleInput   String?
+  sampleOutput  String?
+  expectedApproach String?
+
+  difficulty    Difficulty
+
+  createdAt     DateTime @default(now())
+
+  @@index([assessmentId])
+}
+

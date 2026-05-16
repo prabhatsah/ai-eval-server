@@ -15,6 +15,6 @@ import { JdParserAgent } from './agents/jd-parser.agent';
     JdParserAgent,
   ],
   controllers: [AiController],
-  exports: [AssessmentAgent],
+  exports: [AssessmentAgent, AiService],
 })
 export class AiModule {}

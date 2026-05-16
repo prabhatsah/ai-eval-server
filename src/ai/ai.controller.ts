@@ -6,7 +6,6 @@ import {
   Post,
 } from '@nestjs/common';
 import { AssessmentAgent } from './agents/assessment.agent';
-//import { InterviewAgent } from './agents/interview.agent';
 import {
   ApiBody,
   ApiHeader,
@@ -14,10 +13,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  ProcessInterviewDto,
-  ProcessInterviewResponseDto,
-} from './dto/ai-interview.dto';
 import {
   GenerateAssessmentDto,
   GenerateAssessmentResponseDto,
@@ -35,7 +30,6 @@ export class AiController {
   constructor(
     private readonly assessmentAgent: AssessmentAgent,
     private readonly orchestratorService: AssessmentOrchestratorService,
-    //private readonly interviewAgent: InterviewAgent,
   ) {}
 
   @Post('generate-assessment')

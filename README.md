@@ -22,7 +22,7 @@ npm install
 ### 3. Start PostgreSQL using Docker
 
 ```bash
-docker-compose up -d
+npm run db:start
 ```
 
 This will start:
@@ -37,12 +37,13 @@ This will start:
 Create `.env`:
 
 ```env
-DATABASE_URL="YOUR_DB_URL"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/ai_eval?schema=public"
 
 JWT_ACCESS_SECRET="YOUR_SECRET"
 JWT_REFRESH_SECRET="YOUR_REFRESH_SECRET"
 
-OPENAI_API_KEY=YOUR_API_KEY
+OPENAI_API_KEY=YOUR_API_KEY (optional)
+GEMINI_API_KEY=YOUR_API_KEY (optional)
 ```
 
 Create `.env.test`:
@@ -50,6 +51,7 @@ Create `.env.test`:
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/ai_eval_test?schema=public"
 JWT_SECRET="testsecret"
+JWT_REFRESH_SECRET="YOUR_REFRESH_SECRET"
 ```
 
 ---
@@ -59,11 +61,11 @@ JWT_SECRET="testsecret"
 #### Dev DB:
 
 ```bash
-npm run generate:dev
+npm run generate
 npm run migrate:dev
 ```
 
-#### Test DB:
+#### Test DB: (if needed)
 
 ```bash
 npm run migrate:test
@@ -71,7 +73,15 @@ npm run migrate:test
 
 ---
 
-### 6. Start server
+### 6. Seed data (if needed)
+
+```bash
+npx prisma db seed
+```
+
+---
+
+### 7. Start server
 
 ```bash
 npm run start:dev
@@ -79,7 +89,7 @@ npm run start:dev
 
 ---
 
-### 7. Run tests
+### 8. Run tests
 
 #### Unit tests:
 
@@ -109,6 +119,7 @@ npm run test:e2e
 - Prisma ORM
 - JWT Auth
 - Jest (Unit + E2E)
+- Local LLM/OpenAI/GEMINI
 
 ---
 

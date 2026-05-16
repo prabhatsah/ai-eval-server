@@ -1,30 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto, SafeUser } from './types/user.types';
+
 import { User } from '@prisma/client';
+import { SignupDto } from 'src/auth/dto/signup.dto';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
+    const users = await this.prisma.user.findUnique({
       where: { email },
     });
+    return users;
   }
 
-  async findById(id: string): Promise<SafeUser | null> {
+  async findById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
 
-    if (!user) return null;
+    if (!user) throw new NotFoundException('User not found');
 
     const { password: _password, ...safeUser } = user;
     return safeUser;
   }
 
-  async createUser(data: CreateUserDto): Promise<SafeUser> {
+  async createUser(data: SignupDto) {
     const user = await this.prisma.user.create({
       data,
     });
@@ -33,7 +35,7 @@ export class UserService {
     return safeUser;
   }
 
-  async getAllUsers(): Promise<SafeUser[]> {
+  async getAllUsers() {
     const users = await this.prisma.user.findMany();
 
     return users.map(({ password: _password, ...user }) => user);

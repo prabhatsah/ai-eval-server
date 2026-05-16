@@ -69,12 +69,14 @@ DEFAULTS:
 
 IMPORTANT RULES
 
+- Return ONLY JSON
 - Infer intelligently when data is missing
 - Do NOT leave required fields empty
 - Ensure at least 3 primary skills are returned
 - Ensure output is structured and clean
 - Do NOT include explanations
-- Do NOT include any text outside JSON
+- Do not include any explanation or text outside JSON
+- Ensure valid JSON format
 
 ---
 

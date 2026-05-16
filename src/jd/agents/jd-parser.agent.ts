@@ -3,21 +3,20 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-
-import { buildJdParsingPrompt } from '../../jd/prompts/jd-parser.prompt';
-import { parseJsonSafely } from '../parsers/json.parser';
+import { AiService } from 'src/ai/ai.service';
+import { parseJsonSafely } from 'src/ai/parsers/json.parser';
 
 import {
-  AssessmentInput,
-  AssessmentInputSchema,
-} from '../validators/assessment.schema';
-import { AiService } from '../ai.service';
+  JobDescriptionInput,
+  JobDescriptionSchema,
+} from '../validators/jd.schema';
+import { buildJdParsingPrompt } from '../prompts/jd-parser.prompt';
 
 @Injectable()
 export class JdParserAgent {
   constructor(private readonly aiService: AiService) {}
 
-  async parseJD(jd: string, apiKey: string): Promise<AssessmentInput> {
+  async parseJD(jd: string, apiKey: string): Promise<JobDescriptionInput> {
     const prompt = buildJdParsingPrompt(jd);
 
     let retries = 3;
@@ -26,7 +25,7 @@ export class JdParserAgent {
       try {
         const rawResponse = await this.aiService.generate(prompt, apiKey);
 
-        const parsed = parseJsonSafely(rawResponse, AssessmentInputSchema);
+        const parsed = parseJsonSafely(rawResponse, JobDescriptionSchema);
 
         // Business-level validation (IMPORTANT)
         this.validateParsedJD(parsed);
@@ -56,7 +55,7 @@ export class JdParserAgent {
      Extra Validation Layer
   ========================= */
 
-  private validateParsedJD(data: AssessmentInput) {
+  private validateParsedJD(data: JobDescriptionInput) {
     if (!data.role) {
       throw new Error('Missing role in JD parsing');
     }

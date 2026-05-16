@@ -17,6 +17,6 @@ export class SignupDto {
   password!: string;
 
   @ApiProperty({ enum: Role, example: Role.MANAGER })
-  @IsEnum(Role, { message: 'Role must be MANAGER or EMPLOYEE' })
+  @IsEnum(Role, { message: 'Role must be MANAGER or CANDIDATE' })
   role!: Role;
 }
