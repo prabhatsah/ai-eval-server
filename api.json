@@ -71,6 +71,24 @@
         ]
       }
     },
+    "/auth/api/me": {
+      "get": {
+        "operationId": "AuthController_getUserInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User fetched successful"
+          },
+          "401": {
+            "description": "Invalid token"
+          }
+        },
+        "summary": "Fetch user info.",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/auth/refresh": {
       "post": {
         "operationId": "AuthController_refresh",

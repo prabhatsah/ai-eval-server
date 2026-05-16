@@ -59,6 +59,17 @@ export class AuthService {
     };
   }
 
+  async getUserInfo(accessToken: string){
+    try{
+      const payload = this.jwtService.verify<JwtPayload>(accessToken, {
+        secret: process.env.JWT_ACCESS_SECRET,
+      });
+      console.log(payload);
+    }catch(err){
+      throw new UnauthorizedException();
+    }
+  }
+
   async refreshTokens(refreshToken: string) {
     try {
       const payload = this.jwtService.verify<JwtPayload>(refreshToken, {

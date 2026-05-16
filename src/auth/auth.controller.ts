@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -35,8 +35,23 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
 
     return { accessToken, user };
+  }
+
+  @ApiOperation({ summary: 'Fetch user info.' })
+  @ApiResponse({ status: 200, description: 'User fetched successful' })
+  @ApiResponse({ status: 401, description: 'Invalid token' })
+  @Get('/api/me')
+  async getUserInfo(@Req() req: Request) {
+    const accessToken = (req.cookies as Record<string, string>)['accessToken'];
+    return this.authService.getUserInfo(accessToken);
   }
 
   @Post('refresh')
