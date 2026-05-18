@@ -7,6 +7,11 @@ import { LoginDto } from './dto/login.dto';
 import { Role } from '@prisma/client';
 import { JwtPayload } from './types/auth.types';
 import { PrismaService } from 'src/prisma/prisma.service';
+import {
+  AccessTokenPayload,
+  AccessTokenSchema,
+  RefreshTokenPayload,
+} from './validators/token.schema';
 
 @Injectable()
 export class AuthService {
@@ -39,12 +44,19 @@ export class AuthService {
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = {
+    const accessTokenPayload = {
       userId: user.id,
       role: user.role,
+      email: user.email,
+      name: user.name,
     };
 
-    const { accessToken, refreshToken } = this.generateTokens(payload);
+    const refreshTokenPayload = {
+      userId: user.id,
+    };
+
+    const accessToken = this.generateAccessTokens(accessTokenPayload);
+    const refreshToken = this.generateRefreshTokens(refreshTokenPayload);
 
     await this.saveRefreshToken(user.id, refreshToken);
 
@@ -59,20 +71,20 @@ export class AuthService {
     };
   }
 
-  async getUserInfo(accessToken: string){
-    try{
+  async getUserInfo(accessToken: string) {
+    try {
       const payload = this.jwtService.verify<JwtPayload>(accessToken, {
         secret: process.env.JWT_ACCESS_SECRET,
       });
-      console.log(payload);
-    }catch(err){
+      return payload;
+    } catch (err) {
       throw new UnauthorizedException();
     }
   }
 
   async refreshTokens(refreshToken: string) {
     try {
-      const payload = this.jwtService.verify<JwtPayload>(refreshToken, {
+      const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET,
       });
 
@@ -92,33 +104,43 @@ export class AuthService {
         role: user.role,
       };
 
-      const tokens = this.generateTokens(generateTokensPayload);
+    const accessTokenPayload = {
+      userId: user.id,
+      role: user.role,
+      email: user.email,
+      name: user.name,
+    };
 
-      await this.saveRefreshToken(user.id, tokens.refreshToken);
+    const refreshTokenPayload = {
+      userId: user.id,
+    };
 
-      return tokens;
+    const newAccessToken = this.generateAccessTokens(accessTokenPayload);
+    const newRefreshToken = this.generateRefreshTokens(refreshTokenPayload);
+
+      await this.saveRefreshToken(user.id, refreshToken);
+
+      return {accessToken : newAccessToken, refreshToken : newRefreshToken};
     } catch {
       throw new UnauthorizedException();
     }
   }
 
-  generateTokens(user: { userId: string; role: Role }) {
-    const payload = {
-      userId: user.userId,
-      role: user.role,
-    };
-
+  generateAccessTokens(payload: AccessTokenPayload) {
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '15m',
+      expiresIn: '1m',
       secret: process.env.JWT_ACCESS_SECRET,
     });
+    return accessToken;
+  }
 
+  generateRefreshTokens(payload: RefreshTokenPayload) {
     const refreshToken = this.jwtService.sign(payload, {
       expiresIn: '7d',
       secret: process.env.JWT_REFRESH_SECRET,
     });
 
-    return { accessToken, refreshToken };
+    return refreshToken;
   }
 
   async saveRefreshToken(userId: string, refreshToken: string) {
