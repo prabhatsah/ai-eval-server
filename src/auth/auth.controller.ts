@@ -42,7 +42,7 @@ export class AuthController {
       maxAge: 15 * 60 * 1000,
     });
 
-    return { accessToken, user };
+    return res.json({ message: 'Login Successfull' }).status(200);
   }
 
   @ApiOperation({ summary: 'Fetch user info.' })
@@ -72,8 +72,14 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
 
-    return { accessToken: accessToken };
+     return res.json({ message: 'Token refreshed' }).status(200);
   }
 
   @Post('logout')
