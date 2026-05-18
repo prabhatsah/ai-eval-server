@@ -4,20 +4,20 @@ import { z } from 'zod';
    MCQ
 ========================= */
 
-export const McqSchema = z.object({
+export const McqQuestionSchema = z.object({
   question: z.string(),
-  skill: z.string().optional(),
-  options: z.array(z.string()).min(2),
+  skill: z.string(),
+  options: z.array(z.string()).min(4).max(4),
   correctAnswer: z.string(),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
   explanation: z.string().optional(),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
 });
 
 /* =========================
    Coding
 ========================= */
 
-export const CodingSchema = z.object({
+export const CodingQuestionSchema = z.object({
   title: z.string(),
   problem: z.string(),
   constraints: z.string().optional(),
@@ -28,26 +28,15 @@ export const CodingSchema = z.object({
 });
 
 /* =========================
-   Stored Assessment
+  Assessment
 ========================= */
 
-export const AssessmentSchema = z.object({
-  id: z.string(),
-  jd: z.object({
-    role: z.string(),
-    primarySkills: z.array(z.string()),
-    secondarySkills: z.array(z.string()).optional(),
-    experienceYears: z.number().optional(),
-    difficulty: z.enum(['easy', 'medium', 'hard']),
-    mcqCount: z.number(),
-    codingCount: z.number(),
-    focusAreas: z.array(z.string()).optional(),
-  }),
-  assessment: z.object({
-    mcqs: z.array(McqSchema),
-    coding: z.array(CodingSchema),
-  }),
-  createdAt: z.string(),
+export const AssessmentGenerationSchema = z.object({
+  mcqs: z.array(McqQuestionSchema),
+
+  codingQuestions: z.array(CodingQuestionSchema),
 });
 
-export type AssessmentEntity = z.infer<typeof AssessmentSchema>;
+export type AssessmentGenerationInput = z.infer<
+  typeof AssessmentGenerationSchema
+>;

@@ -9,6 +9,7 @@ import { EvaluationModule } from './evaluation/evaluation.module';
 import { AttemptModule } from './attempt/attempt.module';
 import { AiModule } from './ai/ai.module';
 import { JdModule } from './jd/jd.module';
+import { AssessmentModule } from './assessment/assessment.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { JdModule } from './jd/jd.module';
     AttemptModule,
     AiModule,
     JdModule,
+    AssessmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

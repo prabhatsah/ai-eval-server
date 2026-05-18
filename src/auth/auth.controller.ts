@@ -42,7 +42,7 @@ export class AuthController {
       maxAge: 15 * 60 * 1000,
     });
 
-    return res.json({ message: 'Login Successfull' }).status(200);
+    return { message: 'Login Successfull' };
   }
 
   @ApiOperation({ summary: 'Fetch user info.' })
@@ -79,7 +79,7 @@ export class AuthController {
       maxAge: 15 * 60 * 1000,
     });
 
-     return res.json({ message: 'Token refreshed' }).status(200);
+    return res.json({ message: 'Token refreshed' }).status(200);
   }
 
   @Post('logout')

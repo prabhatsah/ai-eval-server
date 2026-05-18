@@ -547,6 +547,101 @@
           "Job Description"
         ]
       }
+    },
+    "/assessments/generate": {
+      "post": {
+        "operationId": "AssessmentController_generateAssessment",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Assessment generated successfully"
+          }
+        },
+        "summary": "Generate AI assessment",
+        "tags": [
+          "Assessments"
+        ]
+      }
+    },
+    "/assessments": {
+      "get": {
+        "operationId": "AssessmentController_getAssessments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Fetch all assessments",
+        "tags": [
+          "Assessments"
+        ]
+      }
+    },
+    "/assessments/{id}": {
+      "get": {
+        "operationId": "AssessmentController_getAssessment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Fetch assessment by ID",
+        "tags": [
+          "Assessments"
+        ]
+      },
+      "delete": {
+        "operationId": "AssessmentController_deleteAssessment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete assessment",
+        "tags": [
+          "Assessments"
+        ]
+      }
     }
   },
   "info": {
@@ -1168,6 +1263,28 @@
           "role",
           "primarySkills",
           "difficulty"
+        ]
+      },
+      "CreateAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "jdId": {
+            "type": "string",
+            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
+          },
+          "mcqCount": {
+            "type": "number",
+            "example": 10
+          },
+          "codingCount": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "required": [
+          "jdId",
+          "mcqCount",
+          "codingCount"
         ]
       }
     }

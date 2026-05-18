@@ -7,6 +7,7 @@ import {
   Get,
   Param,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -20,6 +21,7 @@ import {
 
 import { JdService } from './jd.service';
 import { CreateJdDto, JdResponseDto } from './dto/jd.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('Job Description')
 @Controller('jd')
@@ -105,6 +107,7 @@ export class JdController {
      GET ALL JDs
   ========================= */
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({
     summary: 'Get all job descriptions',

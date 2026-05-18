@@ -1,41 +1,66 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Param,
+  Post,
+} from '@nestjs/common';
 
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AssessmentService } from './assessment.service';
-import { AssessmentEntity } from './validators/assessment.schema';
 
 @ApiTags('Assessments')
 @Controller('assessments')
 export class AssessmentController {
-  constructor(private readonly service: AssessmentService) {}
+  constructor(private readonly assessmentService: AssessmentService) {}
+
+  @Post('generate')
+  @ApiOperation({
+    summary: 'Generate AI assessment',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Assessment generated successfully',
+  })
+  async generateAssessment(
+    @Body() dto: CreateAssessmentDto,
+
+    @Headers('x-api-key') apiKey: string,
+  ) {
+    return this.assessmentService.generateAssessment(dto, apiKey);
+  }
 
   @Get()
   @ApiOperation({
-    summary: 'Get all assessments',
+    summary: 'Fetch all assessments',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'List of assessments',
-  })
-  getAll(): AssessmentEntity[] {
-    return this.service.findAll();
+  async getAssessments() {
+    return this.assessmentService.getAssessments();
   }
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get assessment by ID',
+    summary: 'Fetch assessment by ID',
   })
-  @ApiParam({ name: 'id' })
-  getById(@Param('id') id: string): AssessmentEntity {
-    return this.service.findById(id);
+  @ApiParam({
+    name: 'id',
+  })
+  async getAssessment(@Param('id') id: string) {
+    return this.assessmentService.getAssessment(id);
   }
 
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete assessment',
   })
-  delete(@Param('id') id: string) {
-    return this.service.delete(id);
+  @ApiParam({
+    name: 'id',
+  })
+  async deleteAssessment(@Param('id') id: string) {
+    return this.assessmentService.deleteAssessment(id);
   }
 }
