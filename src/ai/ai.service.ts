@@ -26,7 +26,7 @@ export class AiService {
           provider: 'gemini',
           prompt,
         }),
-        signal: controller.signal,s
+        signal: controller.signal,
       });
 
       clearTimeout(timeout);
