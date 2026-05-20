@@ -107,7 +107,7 @@ export class JdController {
      GET ALL JDs
   ========================= */
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({
     summary: 'Get all job descriptions',
