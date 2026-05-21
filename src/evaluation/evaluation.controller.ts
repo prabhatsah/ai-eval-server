@@ -26,7 +26,7 @@ interface EvalRequest extends Request {
   };
 }
 
-@ApiTags('Evaluations')
+@ApiTags('Evaluations [Under maintenance]')
 @ApiBearerAuth()
 @Controller('evaluations')
 @UseGuards(JwtAuthGuard, RolesGuard)

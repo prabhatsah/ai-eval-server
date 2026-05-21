@@ -23,7 +23,7 @@ export class AiService {
           'x-api-key': apiKey,
         },
         body: JSON.stringify({
-          provider: 'gemini',
+          provider: 'openai',
           prompt,
         }),
         signal: controller.signal,

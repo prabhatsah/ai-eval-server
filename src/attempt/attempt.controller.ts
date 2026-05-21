@@ -17,7 +17,7 @@ interface AuthRequest extends Request {
   };
 }
 
-@ApiTags('Attempts')
+@ApiTags('Attempts [Under maintenance]')
 @ApiBearerAuth()
 @Controller('attempt')
 @UseGuards(JwtAuthGuard)
