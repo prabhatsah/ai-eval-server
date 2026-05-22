@@ -28,6 +28,14 @@ enum Role {
   CANDIDATE
 }
 
+enum AssessmentStatus {
+  PENDING_REVIEW
+  APPROVED
+  NEEDS_REVISION
+  REJECTED
+  REVIEW_FAILED
+}
+
 //////////////////////////////////////////////////////
 // USER
 //////////////////////////////////////////////////////
@@ -155,6 +163,12 @@ model Assessment {
   secondarySkills Json?
   focusAreas      Json?
 
+  status                   AssessmentStatus @default(PENDING_REVIEW)
+  reviewScore              Int?
+  reviewRecommendation     String?
+  reviewIssues             Json?
+  reviewedAt               DateTime?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -164,6 +178,8 @@ model Assessment {
 
   @@index([role])
   @@index([difficulty])
+  @@index([status])
+  @@index([reviewScore])
 }
 
 //////////////////////////////////////////////////////

@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AssessmentAgent } from './agents/assessment.agent';
 import { Prisma } from '@prisma/client';
+import { AssessmentCriticService } from 'src/assessment-critic/assessment-critic.service';
 
 @Injectable()
 export class AssessmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly assessmentAgent: AssessmentAgent,
+    private readonly assessmentCriticService: AssessmentCriticService,
   ) {}
 
   // private readonly assessments: AssessmentEntity[] = [];
@@ -30,6 +32,9 @@ export class AssessmentService {
       throw new NotFoundException('Job description not found');
     }
 
+    // =========================
+    // GENERATE ASSESSMENT
+    // =========================
     const generated = await this.assessmentAgent.generateAssessment(
       {
         role: jd.role,
@@ -44,6 +49,9 @@ export class AssessmentService {
       apiKey,
     );
 
+    // =========================
+    // SAVE INITIAL ASSESSMENT
+    // =========================
     const assessment = await this.prisma.assessment.create({
       data: {
         jobDescriptionId: jd.id,
@@ -56,6 +64,9 @@ export class AssessmentService {
         secondarySkills: (jd.secondarySkills ??
           Prisma.JsonNull) as Prisma.InputJsonValue,
         focusAreas: (jd.focusAreas ?? Prisma.JsonNull) as Prisma.InputJsonValue,
+
+        status: 'PENDING_REVIEW',
+
         mcqs: {
           create: generated.mcqs.map((mcq) => ({
             question: mcq.question,
@@ -86,7 +97,62 @@ export class AssessmentService {
       },
     });
 
-    return assessment;
+    // =========================
+    // REVIEW ASSESSMENT
+    // =========================
+
+    const review = await this.assessmentCriticService.criticAssessment(
+      {
+        role: jd.role,
+        difficulty: jd.difficulty,
+        experienceYears: jd.experienceYears || 0,
+        primarySkills: jd.primarySkills as string[],
+        secondarySkills: (jd.secondarySkills as string[]) || [],
+        focusAreas: (jd.focusAreas as string[]) || [],
+        mcqs: assessment.mcqs,
+        codingQuestions: assessment.codingQuestions,
+      },
+      apiKey,
+    );
+
+    // =========================
+    // UPDATE REVIEW STATUS
+    // =========================
+
+    let status: 'APPROVED' | 'NEEDS_REVISION' | 'REJECTED' = 'APPROVED';
+
+    if (review.recommendation === 'revise') {
+      status = 'NEEDS_REVISION';
+    }
+
+    if (review.recommendation === 'rejected') {
+      status = 'REJECTED';
+    }
+
+    const updatedAssessment = await this.prisma.assessment.update({
+      where: {
+        id: assessment.id,
+      },
+
+      data: {
+        status,
+        reviewScore: review.overallQualityScore,
+        reviewRecommendation: review.recommendation,
+        reviewIssues: review.issues as Prisma.InputJsonValue,
+        reviewedAt: new Date(),
+      },
+
+      include: {
+        mcqs: true,
+
+        codingQuestions: true,
+      },
+    });
+
+    return {
+      assessment: updatedAssessment,
+      review,
+    };
   }
 
   async getAssessment(id: string) {

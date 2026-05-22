@@ -207,7 +207,7 @@
         ],
         "summary": "Create a new evaluation (Manager only)",
         "tags": [
-          "Evaluations"
+          "Evaluations [Under maintenance]"
         ]
       },
       "get": {
@@ -225,7 +225,7 @@
         ],
         "summary": "Get all evaluations",
         "tags": [
-          "Evaluations"
+          "Evaluations [Under maintenance]"
         ]
       }
     },
@@ -258,7 +258,7 @@
         ],
         "summary": "Get evaluation by ID",
         "tags": [
-          "Evaluations"
+          "Evaluations [Under maintenance]"
         ]
       }
     },
@@ -288,7 +288,7 @@
         ],
         "summary": "Start a new attempt",
         "tags": [
-          "Attempts"
+          "Attempts [Under maintenance]"
         ]
       }
     },
@@ -318,7 +318,7 @@
         ],
         "summary": "Submit answer for a question",
         "tags": [
-          "Attempts"
+          "Attempts [Under maintenance]"
         ]
       }
     },
@@ -338,7 +338,7 @@
         ],
         "summary": "Finalize attempt and calculate score",
         "tags": [
-          "Attempts"
+          "Attempts [Under maintenance]"
         ]
       }
     },
@@ -390,7 +390,7 @@
         },
         "summary": "Generate MCQ and coding assessment questions",
         "tags": [
-          "Assessment"
+          "Assessment [Under maintenance]"
         ]
       }
     },
@@ -433,7 +433,7 @@
         },
         "summary": "Generate assessment from job description",
         "tags": [
-          "Assessment"
+          "Assessment [Under maintenance]"
         ]
       }
     },

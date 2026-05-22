@@ -24,7 +24,7 @@ import {
 } from './dto/generate-from-jd.dto';
 import { AssessmentOrchestratorService } from './assessment-orchestrator.service';
 
-@ApiTags('Assessment')
+@ApiTags('Assessment [Under maintenance]')
 @Controller('ai')
 export class AiController {
   constructor(
