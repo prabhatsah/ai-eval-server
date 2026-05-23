@@ -102,7 +102,7 @@ OUTPUT FORMAT
       "skill": "string",
       "options": ["A", "B", "C", "D"],
       "correctAnswer": "string",
-      "difficulty": "easy|medium|hard",
+      "difficulty": "EASY|MEDIUM|HARD",
       "explanation": "string"
     }
   ],
@@ -114,7 +114,7 @@ OUTPUT FORMAT
       "sampleInput": "string",
       "sampleOutput": "string",
       "expectedApproach": "string",
-      "difficulty": "easy|medium|hard"
+      "difficulty": "EASY|MEDIUM|HARD"
     }
   ]
 }

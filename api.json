@@ -178,274 +178,25 @@
         ]
       }
     },
-    "/evaluations": {
-      "post": {
-        "operationId": "EvaluationController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateEvaluationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Evaluation created successfully"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new evaluation (Manager only)",
-        "tags": [
-          "Evaluations [Under maintenance]"
-        ]
-      },
-      "get": {
-        "operationId": "EvaluationController_getAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "List of evaluations"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get all evaluations",
-        "tags": [
-          "Evaluations [Under maintenance]"
-        ]
-      }
-    },
-    "/evaluations/{id}": {
-      "get": {
-        "operationId": "EvaluationController_getById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "example": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Evaluation found"
-          },
-          "404": {
-            "description": "Evaluation not found"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get evaluation by ID",
-        "tags": [
-          "Evaluations [Under maintenance]"
-        ]
-      }
-    },
-    "/attempt/start": {
-      "post": {
-        "operationId": "AttemptController_start",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StartAttemptDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Attempt started successfully"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Start a new attempt",
-        "tags": [
-          "Attempts [Under maintenance]"
-        ]
-      }
-    },
-    "/attempt/answer": {
-      "post": {
-        "operationId": "AttemptController_submit",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitAnswerDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Answer submitted successfully"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Submit answer for a question",
-        "tags": [
-          "Attempts [Under maintenance]"
-        ]
-      }
-    },
-    "/attempt/submit": {
-      "post": {
-        "operationId": "AttemptController_finalize",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Attempt submitted successfully"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Finalize attempt and calculate score",
-        "tags": [
-          "Attempts [Under maintenance]"
-        ]
-      }
-    },
-    "/ai/generate-assessment": {
-      "post": {
-        "operationId": "AiController_generateAssessment",
-        "parameters": [
-          {
-            "name": "x-api-key",
-            "required": false,
-            "in": "header",
-            "description": "API Key",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GenerateAssessmentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Assessment generated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenerateAssessmentResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error response structure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiErrorResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Generate MCQ and coding assessment questions",
-        "tags": [
-          "Assessment [Under maintenance]"
-        ]
-      }
-    },
-    "/ai/generate-from-jd": {
-      "post": {
-        "description": "Parses a job description to extract structured hiring signals and generates a complete technical assessment.",
-        "operationId": "AiController_generateFromJd",
-        "parameters": [
-          {
-            "name": "x-api-key",
-            "required": false,
-            "in": "header",
-            "description": "API Key for AI provider",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GenerateFromJdDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Assessment generated successfully from JD",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenerateFromJdResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Generate assessment from job description",
-        "tags": [
-          "Assessment [Under maintenance]"
-        ]
-      }
-    },
     "/jd": {
       "post": {
         "description": "Parses a raw JD and stores structured data in database",
         "operationId": "JdController_createJd",
         "parameters": [
           {
-            "name": "x-api-key",
-            "required": false,
+            "name": "x-llm-provider",
+            "required": true,
             "in": "header",
+            "description": "LLM Provider [ gemini | openai ]",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "required": true,
+            "in": "header",
+            "description": "Your Api Key",
             "schema": {
               "type": "string"
             }
@@ -553,9 +304,19 @@
         "operationId": "AssessmentController_generateAssessment",
         "parameters": [
           {
+            "name": "x-llm-provider",
+            "required": true,
+            "in": "header",
+            "description": "LLM Provider [gemini || openai]",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "x-api-key",
             "required": true,
             "in": "header",
+            "description": "Your Api Key",
             "schema": {
               "type": "string"
             }
@@ -640,6 +401,129 @@
         "summary": "Delete assessment",
         "tags": [
           "Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/assign": {
+      "post": {
+        "operationId": "CandidateAssessmentController_assignAssessment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Assessment assigned successfully"
+          }
+        },
+        "summary": "Assign assessment to candidate",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/start": {
+      "patch": {
+        "operationId": "CandidateAssessmentController_startAssessment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Start candidate assessment",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/submit": {
+      "patch": {
+        "operationId": "CandidateAssessmentController_submitAssessment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Submit candidate assessment",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/{id}": {
+      "get": {
+        "operationId": "CandidateAssessmentController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get assigned assessment details by id",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/candidate/{candidateId}": {
+      "get": {
+        "operationId": "CandidateAssessmentController_getCandidateAssessments",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get assessments assigned to candidate",
+        "tags": [
+          "Candidate Assessments"
         ]
       }
     }
@@ -746,466 +630,6 @@
           "createdAt"
         ]
       },
-      "SectionConfigDto": {
-        "type": "object",
-        "properties": {
-          "weight": {
-            "type": "number",
-            "example": 0.5,
-            "minimum": 0,
-            "maximum": 1
-          }
-        },
-        "required": [
-          "weight"
-        ]
-      },
-      "SectionsDto": {
-        "type": "object",
-        "properties": {
-          "AI": {
-            "$ref": "#/components/schemas/SectionConfigDto"
-          },
-          "MCQ": {
-            "$ref": "#/components/schemas/SectionConfigDto"
-          },
-          "CODING": {
-            "$ref": "#/components/schemas/SectionConfigDto"
-          }
-        },
-        "required": [
-          "AI",
-          "MCQ",
-          "CODING"
-        ]
-      },
-      "CreateEvaluationDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Frontend Assessment"
-          },
-          "skill": {
-            "type": "string",
-            "example": "React"
-          },
-          "sections": {
-            "$ref": "#/components/schemas/SectionsDto"
-          },
-          "passingScore": {
-            "type": "number",
-            "example": 60,
-            "minimum": 0,
-            "maximum": 100
-          }
-        },
-        "required": [
-          "title",
-          "skill",
-          "sections",
-          "passingScore"
-        ]
-      },
-      "StartAttemptDto": {
-        "type": "object",
-        "properties": {
-          "evaluationId": {
-            "type": "string",
-            "example": "evaluation-uuid"
-          }
-        },
-        "required": [
-          "evaluationId"
-        ]
-      },
-      "SubmitAnswerDto": {
-        "type": "object",
-        "properties": {
-          "attemptId": {
-            "type": "string",
-            "example": "attempt-uuid"
-          },
-          "question": {
-            "type": "string",
-            "example": "What is closure in JavaScript?"
-          },
-          "answer": {
-            "type": "string",
-            "example": "A closure is a function with preserved scope..."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "MCQ",
-              "CODING",
-              "AI"
-            ],
-            "example": "AI"
-          }
-        },
-        "required": [
-          "attemptId",
-          "question",
-          "answer",
-          "type"
-        ]
-      },
-      "GenerateAssessmentDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string",
-            "example": "Backend Engineer",
-            "description": "Target role for the assessment"
-          },
-          "primarySkills": {
-            "example": [
-              "Node.js",
-              "SQL",
-              "REST APIs"
-            ],
-            "description": "Primary skills that must be covered in the assessment",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "secondarySkills": {
-            "example": [
-              "Docker",
-              "Redis"
-            ],
-            "description": "Optional secondary skills",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "experienceYears": {
-            "type": "number",
-            "example": 3,
-            "description": "Years of experience of the candidate"
-          },
-          "difficulty": {
-            "type": "string",
-            "example": "medium",
-            "description": "Difficulty level of the assessment",
-            "enum": [
-              "easy",
-              "medium",
-              "hard"
-            ]
-          },
-          "mcqCount": {
-            "type": "number",
-            "example": 10,
-            "description": "Number of MCQ questions (default = 10)"
-          },
-          "codingCount": {
-            "type": "number",
-            "example": 1,
-            "description": "Number of coding questions (default = 1)"
-          },
-          "focusAreas": {
-            "example": [
-              "API design",
-              "database optimization"
-            ],
-            "description": "Focus areas for question generation",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "role",
-          "primarySkills",
-          "difficulty"
-        ]
-      },
-      "McqDto": {
-        "type": "object",
-        "properties": {
-          "question": {
-            "type": "string",
-            "example": "A Node.js API intermittently returns 500 errors under load. What is the most likely cause?",
-            "description": "MCQ question"
-          },
-          "skill": {
-            "type": "string",
-            "example": "Node.js",
-            "description": "Skill this question belongs to"
-          },
-          "options": {
-            "example": [
-              "A) Event loop blocking due to sync code",
-              "B) DNS lookup failure",
-              "C) Incorrect HTTP method",
-              "D) Missing environment variables"
-            ],
-            "description": "Available answer options",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "correctAnswer": {
-            "type": "string",
-            "example": "A",
-            "description": "Correct answer option"
-          },
-          "difficulty": {
-            "type": "string",
-            "example": "medium",
-            "description": "Difficulty level of the MCQ"
-          },
-          "explanation": {
-            "type": "string",
-            "example": "Synchronous operations block the event loop, causing request handling delays and failures under load.",
-            "description": "Explanation of the correct answer"
-          }
-        },
-        "required": [
-          "question",
-          "skill",
-          "options",
-          "correctAnswer",
-          "difficulty",
-          "explanation"
-        ]
-      },
-      "CodingQuestionDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Build a Rate-Limited API Endpoint",
-            "description": "Title of the coding problem"
-          },
-          "problem": {
-            "type": "string",
-            "example": "Design a REST API endpoint in Node.js that limits requests per user to 100 requests per minute. Exceeding requests should return HTTP 429.",
-            "description": "Detailed coding problem statement"
-          },
-          "constraints": {
-            "type": "string",
-            "example": "The solution must handle concurrent users efficiently. Avoid in-memory-only solutions for scalability.",
-            "description": "Constraints for solving the problem"
-          },
-          "sampleInput": {
-            "type": "string",
-            "example": "User sends 120 requests in 1 minute",
-            "description": "Sample input for the coding problem"
-          },
-          "sampleOutput": {
-            "type": "string",
-            "example": "First 100 requests succeed, next 20 return 429",
-            "description": "Expected sample output"
-          },
-          "expectedApproach": {
-            "type": "string",
-            "example": "Use middleware with Redis to track request counts per user and reset using expiration policies.",
-            "description": "Suggested approach to solve the problem"
-          },
-          "difficulty": {
-            "type": "string",
-            "example": "medium",
-            "description": "Difficulty level of the coding question"
-          }
-        },
-        "required": [
-          "title",
-          "problem",
-          "constraints",
-          "sampleInput",
-          "sampleOutput",
-          "expectedApproach",
-          "difficulty"
-        ]
-      },
-      "GenerateAssessmentResponseDto": {
-        "type": "object",
-        "properties": {
-          "mcqs": {
-            "description": "List of generated MCQ questions",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/McqDto"
-            }
-          },
-          "coding": {
-            "description": "List of generated coding questions",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CodingQuestionDto"
-            }
-          }
-        },
-        "required": [
-          "mcqs",
-          "coding"
-        ]
-      },
-      "ApiErrorResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": false
-          },
-          "statusCode": {
-            "type": "number",
-            "example": 400
-          },
-          "message": {
-            "type": "string",
-            "example": "Gemini API key is missing"
-          },
-          "errors": {
-            "type": "object",
-            "example": null,
-            "nullable": true
-          },
-          "details": {
-            "type": "object",
-            "example": null,
-            "nullable": true
-          },
-          "timestamp": {
-            "type": "string",
-            "example": "2026-05-12T17:15:00.000Z"
-          },
-          "path": {
-            "type": "string",
-            "example": "/ai/generate-assessment"
-          }
-        },
-        "required": [
-          "success",
-          "statusCode",
-          "message",
-          "errors",
-          "details",
-          "timestamp",
-          "path"
-        ]
-      },
-      "GenerateFromJdDto": {
-        "type": "object",
-        "properties": {
-          "jd": {
-            "type": "string",
-            "example": "We are looking for a Backend Engineer with 3+ years experience in Node.js, SQL, REST APIs. Knowledge of Docker and Redis is a plus.",
-            "description": "Full job description text"
-          },
-          "mcqCount": {
-            "type": "number",
-            "example": 10,
-            "description": "Optional MCQ count (default 10)"
-          },
-          "codingCount": {
-            "type": "number",
-            "example": 1,
-            "description": "Optional coding question count (default 1)"
-          }
-        },
-        "required": [
-          "jd"
-        ]
-      },
-      "ParsedJdDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string",
-            "example": "Backend Engineer"
-          },
-          "primarySkills": {
-            "example": [
-              "Node.js",
-              "SQL",
-              "REST APIs"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "secondarySkills": {
-            "example": [
-              "Docker",
-              "Redis"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "experienceYears": {
-            "type": "number",
-            "example": 3
-          },
-          "difficulty": {
-            "type": "string",
-            "example": "medium"
-          },
-          "mcqCount": {
-            "type": "number",
-            "example": 10
-          },
-          "codingCount": {
-            "type": "number",
-            "example": 1
-          },
-          "focusAreas": {
-            "example": [
-              "API design",
-              "database optimization"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "role",
-          "primarySkills",
-          "secondarySkills",
-          "experienceYears",
-          "difficulty",
-          "mcqCount",
-          "codingCount",
-          "focusAreas"
-        ]
-      },
-      "GenerateFromJdResponseDto": {
-        "type": "object",
-        "properties": {
-          "jd": {
-            "description": "Structured JD data extracted by AI",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ParsedJdDto"
-              }
-            ]
-          },
-          "assessment": {
-            "description": "Generated assessment based on JD",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GenerateAssessmentResponseDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "jd",
-          "assessment"
-        ]
-      },
       "CreateJdDto": {
         "type": "object",
         "properties": {
@@ -1243,9 +667,9 @@
           "difficulty": {
             "type": "string",
             "enum": [
-              "easy",
-              "medium",
-              "hard"
+              "EASY",
+              "MEDIUM",
+              "HARD"
             ]
           },
           "experienceYears": {
@@ -1285,6 +709,51 @@
           "jdId",
           "mcqCount",
           "codingCount"
+        ]
+      },
+      "AssignAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
+          },
+          "assessmentId": {
+            "type": "string",
+            "example": "4000eced-68f1-42ba-bee7-7cf4e818eb52"
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2026-06-01T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "candidateId",
+          "assessmentId"
+        ]
+      },
+      "StartAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "candidateAssessmentId": {
+            "type": "string",
+            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
+          }
+        },
+        "required": [
+          "candidateAssessmentId"
+        ]
+      },
+      "SubmitAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "candidateAssessmentId": {
+            "type": "string",
+            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
+          }
+        },
+        "required": [
+          "candidateAssessmentId"
         ]
       }
     }

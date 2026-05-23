@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AssessmentAgent } from './agents/assessment.agent';
-import { Prisma } from '@prisma/client';
+import { AssessmentStatus, Difficulty, Prisma } from '@prisma/client';
 import { AssessmentCriticService } from 'src/assessment-critic/assessment-critic.service';
+
+interface DurationInput {
+  mcqCount: number;
+  codingCount: number;
+  difficulty: Difficulty;
+}
 
 @Injectable()
 export class AssessmentService {
@@ -20,6 +26,7 @@ export class AssessmentService {
       mcqCount: number;
       codingCount: number;
     },
+    llmProvider: string,
     apiKey: string,
   ) {
     const jd = await this.prisma.jobDescription.findUnique({
@@ -30,6 +37,16 @@ export class AssessmentService {
 
     if (!jd) {
       throw new NotFoundException('Job description not found');
+    }
+
+    const existingAssessment = await this.prisma.assessment.findFirst({
+      where: {
+        jobDescriptionId: dto.jdId,
+      },
+    });
+
+    if (existingAssessment) {
+      throw new NotFoundException('Assessment already exist with this jd');
     }
 
     // =========================
@@ -46,8 +63,15 @@ export class AssessmentService {
         mcqCount: dto.mcqCount,
         codingCount: dto.codingCount,
       },
+      llmProvider,
       apiKey,
     );
+
+    const durationMinutes = this.calculateAssessmentDuration({
+      mcqCount: dto.mcqCount,
+      codingCount: dto.codingCount,
+      difficulty: jd.difficulty,
+    });
 
     // =========================
     // SAVE INITIAL ASSESSMENT
@@ -64,6 +88,7 @@ export class AssessmentService {
         secondarySkills: (jd.secondarySkills ??
           Prisma.JsonNull) as Prisma.InputJsonValue,
         focusAreas: (jd.focusAreas ?? Prisma.JsonNull) as Prisma.InputJsonValue,
+        durationMinutes,
 
         status: 'PENDING_REVIEW',
 
@@ -112,6 +137,7 @@ export class AssessmentService {
         mcqs: assessment.mcqs,
         codingQuestions: assessment.codingQuestions,
       },
+      llmProvider,
       apiKey,
     );
 
@@ -157,7 +183,7 @@ export class AssessmentService {
 
   async getAssessment(id: string) {
     const assessment = await this.prisma.assessment.findUnique({
-      where: { id },
+      where: { id, status: AssessmentStatus.APPROVED },
       include: {
         mcqs: true,
         codingQuestions: true,
@@ -165,14 +191,15 @@ export class AssessmentService {
     });
 
     if (!assessment) {
-      throw new NotFoundException('Assessment not found');
+      throw new NotFoundException('No approved assessment found');
     }
 
     return assessment;
   }
 
   async getAssessments() {
-    return this.prisma.assessment.findMany({
+    const assessments = this.prisma.assessment.findMany({
+      where: { status: AssessmentStatus.APPROVED },
       orderBy: {
         createdAt: 'desc',
       },
@@ -182,6 +209,12 @@ export class AssessmentService {
         codingQuestions: true,
       },
     });
+
+    if (!assessments) {
+      throw new NotFoundException('No approved assessments found');
+    }
+
+    return assessments;
   }
 
   async deleteAssessment(id: string) {
@@ -201,4 +234,40 @@ export class AssessmentService {
       message: 'Assessment deleted successfully',
     };
   }
+
+  calculateAssessmentDuration = ({
+    mcqCount,
+    codingCount,
+    difficulty,
+  }: DurationInput): number => {
+    // 2 mins per MCQ
+    const mcqDuration = mcqCount * 2;
+
+    // coding duration based on difficulty
+    let codingDurationPerQuestion = 0;
+
+    switch (difficulty) {
+      case 'EASY':
+        codingDurationPerQuestion = 20;
+        break;
+
+      case 'MEDIUM':
+        codingDurationPerQuestion = 40;
+        break;
+
+      case 'HARD':
+        codingDurationPerQuestion = 60;
+        break;
+
+      default:
+        codingDurationPerQuestion = 30;
+    }
+
+    const codingDuration = codingCount * codingDurationPerQuestion;
+
+    // additional buffer
+    const buffer = 10;
+
+    return mcqDuration + codingDuration + buffer;
+  };
 }

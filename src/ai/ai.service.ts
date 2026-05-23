@@ -5,13 +5,18 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { mapHttpError } from './mapper/httpError.mapper';
+import { extractProviderError } from './mapper/providerError.mapper';
 
 @Injectable()
 export class AiService {
   private readonly BASE_URL = 'https://ai-proxy-lxs4.onrender.com/ask';
   private readonly TIMEOUT = 105000; // 15s
 
-  async generate(prompt: string, apiKey: string): Promise<string> {
+  async generate(
+    prompt: string,
+    llmProvider: string,
+    apiKey: string,
+  ): Promise<string> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.TIMEOUT);
 
@@ -23,7 +28,7 @@ export class AiService {
           'x-api-key': apiKey,
         },
         body: JSON.stringify({
-          provider: 'gemini',
+          provider: llmProvider,
           prompt,
         }),
         signal: controller.signal,
@@ -31,26 +36,32 @@ export class AiService {
 
       clearTimeout(timeout);
 
-      const text = await res.text();
+      const rawText = await res.text();
 
       // parsing JSON safely
       let data: any;
       try {
-        data = JSON.parse(text);
+        data = rawText ? JSON.parse(rawText) : null;
       } catch {
-        throw new Error(`Invalid JSON response: ${text}`);
+        throw new InternalServerErrorException({
+          message: 'AI provider returned invalid JSON response',
+        });
       }
 
-      // Handle HTTP errors properly
+      // Handle provider errors
       if (!res.ok) {
-        mapHttpError(res.status, data?.error || text);
+        const providerMessage = extractProviderError(
+          data,
+          'AI provider request failed',
+        );
+
+        mapHttpError(res.status, providerMessage);
       }
 
-      // Validate response structure
-      if (!data?.response || typeof data.response !== 'string') {
+      // Validate success response
+      if (!data || typeof data.response !== 'string' || !data.response.trim()) {
         throw new InternalServerErrorException({
           message: 'Invalid AI response format',
-          details: data,
         });
       }
 
@@ -62,23 +73,23 @@ export class AiService {
     } catch (error: any) {
       clearTimeout(timeout);
 
-      //  Abort (timeout)
+      // Request timeout
       if (error.name === 'AbortError') {
         throw new GatewayTimeoutException({
           message: 'AI request timed out',
         });
       }
 
-      // Already mapped NestJS error
+      // Already handled NestJS exceptions
       if (error instanceof HttpException) {
         throw error;
       }
 
-      console.error('[AI ERROR]', error);
+      // console.error('[AI ERROR]', error);
 
       throw new InternalServerErrorException({
-        message: 'Failed to call AI service',
-        details: error.message,
+        message: 'Failed to communicate with AI provider',
+        details: error?.message || 'Unknown error',
       });
     }
   }

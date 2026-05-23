@@ -9,9 +9,13 @@ export class JdService {
     private readonly jdParserAgent: JdParserAgent,
   ) {}
 
-  async createJd(jdText: string, apiKey: string) {
+  async createJd(jdText: string, llmProvider: string, apiKey: string) {
     // Parse JD
-    const parsed = await this.jdParserAgent.parseJD(jdText, apiKey);
+    const parsed = await this.jdParserAgent.parseJD(
+      jdText,
+      llmProvider,
+      apiKey,
+    );
 
     // Versioning logic
     const jdGroupId = crypto.randomUUID();

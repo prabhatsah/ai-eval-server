@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   // output   = "../src/generated/prisma"
@@ -12,15 +7,14 @@ datasource db {
   provider = "postgresql"
 }
 
-
 //////////////////////////////////////////////////////
 // ENUMS
 //////////////////////////////////////////////////////
 
 enum Difficulty {
-  easy
-  medium
-  hard
+  EASY
+  MEDIUM
+  HARD
 }
 
 enum Role {
@@ -34,6 +28,15 @@ enum AssessmentStatus {
   NEEDS_REVISION
   REJECTED
   REVIEW_FAILED
+}
+
+enum CandidateAssessmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  SUBMITTED
+  EVALUATED
+  EXPIRED
+  CANCELLED
 }
 
 //////////////////////////////////////////////////////
@@ -50,7 +53,7 @@ model User {
 
   refreshToken String?
 
-  attempts Attempt[]
+  candidateAssessment CandidateAssessment[]
 }
 
 //////////////////////////////////////////////////////
@@ -64,44 +67,77 @@ model Evaluation {
   createdBy String
   createdAt DateTime @default(now())
 
-  attempts Attempt[]
+  candidateAssessment CandidateAssessment[]
 }
 
 //////////////////////////////////////////////////////
-// ATTEMPT
+// CANDIDATE ASSESSMENT
 //////////////////////////////////////////////////////
-model Attempt {
-  id           String @id @default(uuid())
-  userId       String
-  evaluationId String
-  status       String
+
+model CandidateAssessment {
+  id          String @id @default(uuid())
+  candidateId String
+  candidate   User   @relation(fields: [candidateId], references: [id])
+
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+
+  status CandidateAssessmentStatus @default(ASSIGNED)
 
   mcqScore    Float?
   codingScore Float?
   aiScore     Float?
   finalScore  Float?
 
-  startedAt   DateTime  @default(now())
+  startedAt   DateTime?
   submittedAt DateTime?
+  evaluatedAt DateTime?
+  expiresAt   DateTime?
 
-  user       User       @relation(fields: [userId], references: [id])
-  evaluation Evaluation @relation(fields: [evaluationId], references: [id])
+  evaluationSummary String?
+  feedback          Json?
 
-  responses Response[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  responses    Response[]
+  evaluation   Evaluation? @relation(fields: [evaluationId], references: [id])
+  evaluationId String?
+
+  @@unique([candidateId, assessmentId])
+  @@index([candidateId])
+  @@index([assessmentId])
+  @@index([status])
+  @@index([finalScore])
 }
 
+//////////////////////////////////////////////////////
+// RESPONSE
+//////////////////////////////////////////////////////
 
 model Response {
-  id        String @id @default(uuid())
-  attemptId String
+  id String @id @default(uuid())
 
-  question String
-  answer   String
-  score    Float?
-  feedback String?
-  type     String
+  candidateAssessmentId String
 
-  attempt Attempt @relation(fields: [attemptId], references: [id])
+  candidateAssessment CandidateAssessment @relation(fields: [candidateAssessmentId], references: [id])
+
+  mcqQuestionId    String?
+  codingQuestionId String?
+
+  selectedOption String?
+  codingAnswer   String?
+
+  isCorrect  Boolean?
+  score      Float?
+  aiFeedback String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([candidateAssessmentId])
+  @@index([mcqQuestionId])
+  @@index([codingQuestionId])
 }
 
 //////////////////////////////////////////////////////
@@ -109,16 +145,16 @@ model Response {
 //////////////////////////////////////////////////////
 
 model JobDescription {
-  id              String   @id @default(uuid())
+  id String @id @default(uuid())
 
   // Logical grouping (same JD across versions)
-  jdGroupId       String
+  jdGroupId String
 
   // Versioning
-  version         Int
+  version Int
 
   // Raw input
-  rawText         String
+  rawText String
 
   // Parsed structured data
   role            String
@@ -128,17 +164,17 @@ model JobDescription {
   difficulty      Difficulty
   focusAreas      Json?
 
-  isLatest        Boolean   @default(true) // ✅ quick access
+  isLatest Boolean @default(true) // ✅ quick access
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // RELATION
-  assessments     Assessment[]
+  assessments Assessment[]
 
+  @@unique([jdGroupId, version]) // prevents duplicate versions
   @@index([jdGroupId])
   @@index([isLatest])
-  @@unique([jdGroupId, version]) // prevents duplicate versions
 }
 
 //////////////////////////////////////////////////////
@@ -146,7 +182,7 @@ model JobDescription {
 //////////////////////////////////////////////////////
 
 model Assessment {
-  id               String   @id @default(uuid())
+  id String @id @default(uuid())
 
   jobDescriptionId String
   jobDescription   JobDescription @relation(fields: [jobDescriptionId], references: [id])
@@ -156,25 +192,28 @@ model Assessment {
   difficulty      Difficulty
   experienceYears Int?
 
-  mcqCount        Int
-  codingCount     Int
+  mcqCount    Int
+  codingCount Int
+
+  durationMinutes Int
 
   primarySkills   Json
   secondarySkills Json?
   focusAreas      Json?
 
-  status                   AssessmentStatus @default(PENDING_REVIEW)
-  reviewScore              Int?
-  reviewRecommendation     String?
-  reviewIssues             Json?
-  reviewedAt               DateTime?
+  status               AssessmentStatus @default(PENDING_REVIEW)
+  reviewScore          Int?
+  reviewRecommendation String?
+  reviewIssues         Json?
+  reviewedAt           DateTime?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // RELATIONS
-  mcqs            McqQuestion[]
-  codingQuestions CodingQuestion[]
+  mcqs                 McqQuestion[]
+  codingQuestions      CodingQuestion[]
+  candidateAssessments CandidateAssessment[]
 
   @@index([role])
   @@index([difficulty])
@@ -187,21 +226,21 @@ model Assessment {
 //////////////////////////////////////////////////////
 
 model McqQuestion {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  assessmentId  String
-  assessment    Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
 
-  question      String
-  skill         String?
+  question String
+  skill    String?
 
   options       Json
   correctAnswer String
 
-  difficulty    Difficulty
-  explanation   String?
+  difficulty  Difficulty
+  explanation String?
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([assessmentId])
   @@index([skill])
@@ -212,23 +251,22 @@ model McqQuestion {
 //////////////////////////////////////////////////////
 
 model CodingQuestion {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  assessmentId  String
-  assessment    Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
 
-  title         String
-  problem       String
-  constraints   String?
+  title       String
+  problem     String
+  constraints String?
 
-  sampleInput   String?
-  sampleOutput  String?
+  sampleInput      String?
+  sampleOutput     String?
   expectedApproach String?
 
-  difficulty    Difficulty
+  difficulty Difficulty
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([assessmentId])
 }
-

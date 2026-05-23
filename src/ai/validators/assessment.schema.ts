@@ -1,3 +1,4 @@
+import { Difficulty } from '@prisma/client';
 import { z } from 'zod';
 
 /* =========================
@@ -9,7 +10,7 @@ export const McqSchema = z.object({
   skill: z.string(),
   options: z.array(z.string()).length(4),
   correctAnswer: z.string(),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
+  difficulty: z.enum(Difficulty),
   explanation: z.string(),
 });
 
@@ -24,7 +25,7 @@ export const CodingSchema = z.object({
   sampleInput: z.string(),
   sampleOutput: z.string(),
   expectedApproach: z.string(),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
+  difficulty: z.enum(Difficulty),
 });
 
 /* =========================
@@ -49,7 +50,7 @@ export const AssessmentInputSchema = z.object({
 
   experienceYears: z.number().optional(),
 
-  difficulty: z.enum(['easy', 'medium', 'hard']),
+  difficulty: z.enum(Difficulty),
 
   mcqCount: z.number().min(1).max(20).default(10),
 

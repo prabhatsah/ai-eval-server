@@ -25,9 +25,9 @@ export function parseJsonSafely<T>(raw: string, schema: ZodType<T>): T {
 
     return schema.parse(parsed);
   } catch (error: any) {
-    // console.error('RAW RESPONSE:', raw);
-    // console.error('CLEANED:', cleaned);
+    console.error('RAW RESPONSE:', raw);
+    console.error('CLEANED:', cleaned);
 
-    throw new Error(`Invalid JSON or schema mismatch: ${error.message}`);
+    throw new Error(`Invalid JSON response from LLM+`);
   }
 }

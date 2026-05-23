@@ -30,6 +30,7 @@ export class AssessmentAgent {
       mcqCount: number;
       codingCount: number;
     },
+    llmProvider: string,
     apiKey: string,
   ): Promise<AssessmentGenerationInput> {
     const prompt = buildAssessmentPrompt(payload);
@@ -38,7 +39,11 @@ export class AssessmentAgent {
 
     while (retries > 0) {
       try {
-        const rawResponse = await this.aiService.generate(prompt, apiKey);
+        const rawResponse = await this.aiService.generate(
+          prompt,
+          llmProvider,
+          apiKey,
+        );
 
         const parsed = parseJsonSafely(rawResponse, AssessmentGenerationSchema);
 

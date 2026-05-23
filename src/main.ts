@@ -45,7 +45,7 @@ async function bootstrap() {
     JSON.stringify(document, null, 2),
   );
 
-  SwaggerModule.setup('api-docs', app, document); // http://localhost:8080/api
+  SwaggerModule.setup('api-docs', app, document); // http://localhost:8080/api-docs
 
   // app.useGlobalPipes(
   //   new ValidationPipe({

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Difficulty } from '@prisma/client';
 import {
   IsArray,
   IsEnum,
@@ -38,8 +39,8 @@ export class JdResponseDto {
   @IsString({ each: true })
   secondarySkills?: string[];
 
-  @ApiProperty({ enum: ['easy', 'medium', 'hard'] })
-  @IsEnum(['easy', 'medium', 'hard'])
+  @ApiProperty({ enum: Difficulty })
+  @IsEnum(Difficulty)
   difficulty: string;
 
   @ApiProperty({ required: false })

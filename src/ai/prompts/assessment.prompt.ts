@@ -1,4 +1,4 @@
-import { AssessmentInput } from "../validators/assessment.schema";
+import { AssessmentInput } from '../validators/assessment.schema';
 
 export const buildAssessmentPrompt = (input: AssessmentInput): string => {
   return `
@@ -58,9 +58,9 @@ DIFFICULTY ADJUSTMENT
 Experience: ${input.experienceYears ?? 'Not specified'}
 
 Guidelines:
-- easy → basic implementation, small logic
-- medium → multi-step logic, debugging, real-world usage
-- hard → complex logic, optimization, system thinking
+- EASY → basic implementation, small logic
+- MEDIUM → multi-step logic, debugging, real-world usage
+- HARD → complex logic, optimization, system thinking
 
 ---
 
@@ -83,7 +83,7 @@ JSON FORMAT:
       "skill": "string",
       "options": ["A", "B", "C", "D"],
       "correctAnswer": "string",
-      "difficulty": "easy|medium|hard",
+      "difficulty": "EASY|MEDIUM|HARD",
       "explanation": "string"
     }
   ],
@@ -95,7 +95,7 @@ JSON FORMAT:
       "sampleInput": "string",
       "sampleOutput": "string",
       "expectedApproach": "string",
-      "difficulty": "easy|medium|hard"
+      "difficulty": "EASY|MEDIUM|HARD"
     }
   ]
 }

@@ -32,7 +32,7 @@ JSON FORMAT:
   },
   "nextQuestion": {
     "question": "string",
-    "difficulty": "easy|medium|hard",
+    "difficulty": "EASY|MEDIUM|HARD",
     "focusArea": "string"
   }
 }

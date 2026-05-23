@@ -16,14 +16,22 @@ import { buildJdParsingPrompt } from '../prompts/jd-parser.prompt';
 export class JdParserAgent {
   constructor(private readonly aiService: AiService) {}
 
-  async parseJD(jd: string, apiKey: string): Promise<JobDescriptionInput> {
+  async parseJD(
+    jd: string,
+    llmProvider: string,
+    apiKey: string,
+  ): Promise<JobDescriptionInput> {
     const prompt = buildJdParsingPrompt(jd);
 
     let retries = 3;
 
     while (retries > 0) {
       try {
-        const rawResponse = await this.aiService.generate(prompt, apiKey);
+        const rawResponse = await this.aiService.generate(
+          prompt,
+          llmProvider,
+          apiKey,
+        );
 
         const parsed = parseJsonSafely(rawResponse, JobDescriptionSchema);
 

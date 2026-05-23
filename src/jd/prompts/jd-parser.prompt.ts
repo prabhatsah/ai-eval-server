@@ -52,9 +52,9 @@ EXPERIENCE:
 
 DIFFICULTY MAPPING:
 - Based on experienceYears:
-  0–2 → easy
-  2–5 → medium
-  5+ → hard
+  0–2 → EASY
+  2–5 → MEDIUM
+  5+ → HARD
 
 FOCUS AREAS:
 - Infer 1–3 key areas based on responsibilities
@@ -87,7 +87,7 @@ OUTPUT FORMAT (STRICT JSON ONLY)
   "primarySkills": ["string"],
   "secondarySkills": ["string"],
   "experienceYears": number,
-  "difficulty": "easy|medium|hard",
+  "difficulty": "EASY|MEDIUM|HARD",
   "mcqCount": number,
   "codingCount": number,
   "focusAreas": ["string"]

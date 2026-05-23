@@ -1,3 +1,4 @@
+import { Difficulty } from '@prisma/client';
 import { z } from 'zod';
 
 export const JobDescriptionSchema = z.object({
@@ -10,7 +11,7 @@ export const JobDescriptionSchema = z.object({
 
   experienceYears: z.number().optional(),
 
-  difficulty: z.enum(['easy', 'medium', 'hard']),
+  difficulty: z.enum(Difficulty),
 
   focusAreas: z.array(z.string()).optional(),
 });

@@ -37,8 +37,12 @@ export class JdController {
     description: 'Parses a raw JD and stores structured data in database',
   })
   @ApiHeader({
+    name: 'x-llm-provider',
+    description: 'LLM Provider [ gemini | openai ]',
+  })
+  @ApiHeader({
     name: 'x-api-key',
-    required: false,
+    description: 'Your Api Key',
   })
   @ApiBody({
     type: CreateJdDto,
@@ -49,8 +53,13 @@ export class JdController {
   })
   async createJd(
     @Body() body: CreateJdDto,
+    @Headers('x-llm-provider') llmProvider: string,
     @Headers('x-api-key') apiKey?: string,
   ) {
+    if (!llmProvider) {
+      throw new BadRequestException('LLM provider is missing');
+    }
+
     if (!apiKey) {
       throw new BadRequestException('API key is missing');
     }
@@ -59,7 +68,7 @@ export class JdController {
       throw new BadRequestException('JD text is required');
     }
 
-    return this.jdService.createJd(body.jd, apiKey);
+    return this.jdService.createJd(body.jd, llmProvider, apiKey);
   }
 
   /* =========================

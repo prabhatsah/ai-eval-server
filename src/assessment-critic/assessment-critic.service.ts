@@ -17,9 +17,13 @@ export class AssessmentCriticService {
       mcqs: any[];
       codingQuestions: any[];
     },
-
+    llmProvider: string,
     apiKey: string,
   ) {
-    return this.assessmentCriticAgent.criticAssessment(payload, apiKey);
+    return this.assessmentCriticAgent.criticAssessment(
+      payload,
+      llmProvider,
+      apiKey,
+    );
   }
 }

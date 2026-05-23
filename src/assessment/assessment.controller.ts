@@ -8,7 +8,13 @@ import {
   Post,
 } from '@nestjs/common';
 
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiHeader,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AssessmentService } from './assessment.service';
@@ -19,6 +25,14 @@ export class AssessmentController {
   constructor(private readonly assessmentService: AssessmentService) {}
 
   @Post('generate')
+  @ApiHeader({
+    name: 'x-llm-provider',
+    description: 'LLM Provider [gemini || openai]',
+  })
+  @ApiHeader({
+    name: 'x-api-key',
+    description: 'Your Api Key',
+  })
   @ApiOperation({
     summary: 'Generate AI assessment',
   })
@@ -28,10 +42,10 @@ export class AssessmentController {
   })
   async generateAssessment(
     @Body() dto: CreateAssessmentDto,
-
+    @Headers('x-llm-provider') llmProvider: string,
     @Headers('x-api-key') apiKey: string,
   ) {
-    return this.assessmentService.generateAssessment(dto, apiKey);
+    return this.assessmentService.generateAssessment(dto, llmProvider, apiKey);
   }
 
   @Get()

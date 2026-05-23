@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Difficulty } from '@prisma/client';
 
 /* =========================
    Request DTO
@@ -36,9 +37,9 @@ export class GenerateAssessmentDto {
   @ApiProperty({
     example: 'medium',
     description: 'Difficulty level of the assessment',
-    enum: ['easy', 'medium', 'hard'],
+    enum: Difficulty,
   })
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: Difficulty;
 
   @ApiProperty({
     example: 10,

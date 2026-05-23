@@ -1,76 +1,69 @@
 import {
-  BadGatewayException,
   ForbiddenException,
   GatewayTimeoutException,
   HttpException,
   HttpStatus,
-  Injectable,
   InternalServerErrorException,
   ServiceUnavailableException,
   UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 
-/* =========================
-     Error Mapper 
-  ========================= */
-
-export const mapHttpError = (status: number, message: any): never => {
+export const mapHttpError = (
+  status: number,
+  providerMessage: string,
+): never => {
   switch (status) {
     case 400:
-      throw new BadGatewayException({
-        message: 'Invalid AI request',
-        details: message,
+      throw new BadRequestException({
+        message: providerMessage,
       });
 
     case 401:
       throw new UnauthorizedException({
-        message: 'Invalid API key',
-        details: message,
+        message: providerMessage,
       });
 
     case 403:
       throw new ForbiddenException({
-        message: 'Access forbidden',
-        details: message,
+        message: providerMessage,
       });
 
     case 404:
-      throw new BadGatewayException({
-        message: 'AI endpoint not found',
-        details: message,
+      throw new NotFoundException({
+        message: providerMessage,
       });
 
     case 429:
       throw new HttpException(
         {
-          message: 'Rate limit exceeded',
-          details: message,
+          message: providerMessage,
         },
         HttpStatus.TOO_MANY_REQUESTS,
       );
 
     case 500:
       throw new InternalServerErrorException({
-        message: 'AI internal error',
-        details: message,
+        message: providerMessage,
       });
 
     case 503:
       throw new ServiceUnavailableException({
-        message: 'AI service unavailable',
-        details: message,
+        message: providerMessage,
       });
 
     case 504:
       throw new GatewayTimeoutException({
-        message: 'AI gateway timeout',
-        details: message,
+        message: providerMessage,
       });
 
     default:
-      throw new InternalServerErrorException({
-        message: 'Unknown AI error',
-        details: message,
-      });
+      throw new HttpException(
+        {
+          message: providerMessage || 'Unknown AI error',
+        },
+        status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
   }
 };

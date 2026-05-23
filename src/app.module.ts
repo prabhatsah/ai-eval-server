@@ -5,11 +5,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { EvaluationModule } from './evaluation/evaluation.module';
-import { AttemptModule } from './attempt/attempt.module';
-import { AiModule } from './ai/ai.module';
 import { JdModule } from './jd/jd.module';
 import { AssessmentModule } from './assessment/assessment.module';
+import { CandidateAssessmentModule } from './candidate-assessment/candidate-assessment.module';
 
 @Module({
   imports: [
@@ -19,11 +17,12 @@ import { AssessmentModule } from './assessment/assessment.module';
     PrismaModule,
     AuthModule,
     UserModule,
-    EvaluationModule,
-    AttemptModule,
-    AiModule,
+    // EvaluationModule,
+    // AttemptModule,
+    // AiModule,
     JdModule,
     AssessmentModule,
+    CandidateAssessmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

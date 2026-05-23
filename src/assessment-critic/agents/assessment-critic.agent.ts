@@ -26,6 +26,7 @@ export class AssessmentCriticAgent {
       mcqs: any[];
       codingQuestions: any[];
     },
+    llmProvider: string,
     apiKey: string,
   ): Promise<AssessmentCriticInput> {
     const prompt = buildAssessmentCriticPrompt(input);
@@ -34,7 +35,11 @@ export class AssessmentCriticAgent {
 
     while (retries > 0) {
       try {
-        const rawResponse = await this.aiService.generate(prompt, apiKey);
+        const rawResponse = await this.aiService.generate(
+          prompt,
+          llmProvider,
+          apiKey,
+        );
 
         const parsed = parseJsonSafely(rawResponse, AssessmentCriticSchema);
 
@@ -62,18 +67,23 @@ export class AssessmentCriticAgent {
   }
 
   private validateCritic(data: AssessmentCriticInput) {
-    if (data.overallQualityScore < 40) {
+    // Hard rejection rules
+    if (data.overallQualityScore < 40 || data.relevanceScore < 50) {
       data.recommendation = 'rejected';
+      return;
     }
 
-    if (data.relevanceScore < 50) {
-      data.recommendation = 'rejected';
-    }
-
-    if (data.duplicateQuestionScore < 50) {
+    // Revision rules
+    if (
+      data.duplicateQuestionScore < 70 ||
+      data.clarityScore < 60 ||
+      data.practicalityScore < 60
+    ) {
       data.recommendation = 'revise';
+      return;
     }
 
-    return true;
+    // Approved
+    data.recommendation = 'approved';
   }
 }

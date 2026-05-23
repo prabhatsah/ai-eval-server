@@ -1,4 +1,4 @@
-export type DifficultyLevel = 'easy' | 'medium' | 'hard';
+import { Difficulty } from '@prisma/client';
 
 export interface InterviewHistoryItem {
   question: string;
@@ -21,7 +21,7 @@ export interface InterviewEvaluation {
 
 export interface NextQuestion {
   question: string;
-  difficulty: DifficultyLevel;
+  difficulty: Difficulty;
   focusArea: string;
 }
 
