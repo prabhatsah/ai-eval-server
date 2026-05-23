@@ -195,7 +195,7 @@ model Assessment {
   mcqCount    Int
   codingCount Int
 
-  durationMinutes Int
+  durationMinutes Int?
 
   primarySkills   Json
   secondarySkills Json?
