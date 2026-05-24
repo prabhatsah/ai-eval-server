@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/": {
+    "/health": {
       "get": {
-        "operationId": "AppController_getHello",
+        "operationId": "AppController_checkHealth",
         "parameters": [],
         "responses": {
           "200": {
