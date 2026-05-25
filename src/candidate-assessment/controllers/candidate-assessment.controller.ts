@@ -43,9 +43,7 @@ export class CandidateAssessmentController {
     summary: 'Submit candidate assessment',
   })
   async submitAssessment(@Body() dto: SubmitAssessmentDto) {
-    return this.candidateAssessmentService.submitAssessment(
-      dto.candidateAssessmentId,
-    );
+    return this.candidateAssessmentService.submitAssessment(dto);
   }
 
   // GET BY ID

@@ -9,6 +9,7 @@ import { JdModule } from './jd/jd.module';
 import { AssessmentModule } from './assessment/assessment.module';
 import { CandidateAssessmentModule } from './candidate-assessment/candidate-assessment.module';
 import { ResumeModule } from './resume/resume.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { ResumeModule } from './resume/resume.module';
     PrismaModule,
     AuthModule,
     UserModule,
-    // EvaluationModule,
+    EvaluationModule,
     // AttemptModule,
     // AiModule,
     JdModule,

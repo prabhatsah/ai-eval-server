@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 export const McqQuestionSchema = z.object({
   question: z.string(),
-  skill: z.string(),
+  skills: z.array(z.string()),
   options: z.array(z.string()).min(4).max(4),
   correctAnswer: z.string(),
   explanation: z.string().optional(),

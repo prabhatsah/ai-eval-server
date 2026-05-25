@@ -8,10 +8,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AssignAssessmentDto } from '../dto/assign-assessment.dto';
 import { CandidateAssessmentSchema } from '../validators/candidate-assessment.schema';
 import { AssessmentStatus, CandidateAssessmentStatus } from '@prisma/client';
+import { EvaluationService } from 'src/evaluation/evaluation.service';
+import { SubmitAssessmentDto } from '../dto/submit-assessment.dto';
 
 @Injectable()
 export class CandidateAssessmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly evaluationService: EvaluationService,
+  ) {}
 
   //////////////////////////////////////////////////////
   // ASSIGN ASSESSMENT
@@ -122,14 +127,11 @@ export class CandidateAssessmentService {
     return CandidateAssessmentSchema.parse(updated);
   }
 
-  //////////////////////////////////////////////////////
   // SUBMIT ASSESSMENT
-  //////////////////////////////////////////////////////
-
-  async submitAssessment(candidateAssessmentId: string) {
+  async submitAssessment(dto: SubmitAssessmentDto) {
     const assignment = await this.prisma.candidateAssessment.findUnique({
       where: {
-        id: candidateAssessmentId,
+        id: dto.candidateAssessmentId,
       },
       include: {
         assessment: {
@@ -179,19 +181,52 @@ export class CandidateAssessmentService {
       }
     }
 
+    // EVALUATE
+    const evaluated = await this.evaluationService.evaluateMcqs({
+      candidateAssessmentId: dto.candidateAssessmentId,
+
+      answers: dto.answers,
+    });
+
+    console.log('evaluated:', evaluated);
+
+    // SAVE RESPONSES
+    await this.prisma.response.createMany({
+      data: evaluated.responses.map((response) => ({
+        candidateAssessmentId: dto.candidateAssessmentId,
+        mcqQuestionId: response.mcqQuestionId,
+        selectedOption: response.selectedOption,
+        isCorrect: response.isCorrect,
+        score: response.score,
+      })),
+    });
+
     // SUBMIT
     const updated = await this.prisma.candidateAssessment.update({
       where: {
-        id: assignment.id,
+        id: dto.candidateAssessmentId,
       },
 
       data: {
-        status: 'SUBMITTED',
+        status: CandidateAssessmentStatus.EVALUATED,
         submittedAt: new Date(),
+        evaluatedAt: new Date(),
+        mcqScore: evaluated.percentage,
+        finalScore: evaluated.percentage,
+        skillBreakdown: evaluated.skillBreakdown,
       },
     });
 
-    return CandidateAssessmentSchema.parse(updated);
+    // UPDATE USER SKILL PROFILE
+    await this.updateUserSkillProfile(assignment.candidateId);
+
+    return {
+      score: evaluated.percentage,
+      correct: evaluated.correct,
+      wrong: evaluated.wrong,
+      skillBreakdown: evaluated.skillBreakdown,
+      status: updated.status,
+    };
   }
 
   // GET BY ID (CANDIDATE SAFE RESPONSE)
@@ -301,5 +336,84 @@ export class CandidateAssessmentService {
     }
 
     return assignments;
+  }
+
+  private async updateUserSkillProfile(candidateId: string) {
+    const assessments = await this.prisma.candidateAssessment.findMany({
+      where: {
+        candidateId,
+
+        status: 'EVALUATED',
+      },
+
+      select: {
+        skillBreakdown: true,
+
+        finalScore: true,
+      },
+    });
+
+    const skillAccumulator: Record<
+      string,
+      {
+        total: number;
+        count: number;
+      }
+    > = {};
+
+    let totalScore = 0;
+
+    let totalAssessments = 0;
+
+    for (const assessment of assessments) {
+      if (assessment.finalScore) {
+        totalScore += assessment.finalScore;
+
+        totalAssessments++;
+      }
+
+      const breakdown = assessment.skillBreakdown as Record<string, number>;
+
+      if (!breakdown) {
+        continue;
+      }
+
+      for (const skill in breakdown) {
+        if (!skillAccumulator[skill]) {
+          skillAccumulator[skill] = {
+            total: 0,
+            count: 0,
+          };
+        }
+
+        skillAccumulator[skill].total += breakdown[skill];
+
+        skillAccumulator[skill].count += 1;
+      }
+    }
+
+    const overallSkillScores: Record<string, number> = {};
+
+    for (const skill in skillAccumulator) {
+      const data = skillAccumulator[skill];
+
+      overallSkillScores[skill] = Number((data.total / data.count).toFixed(2));
+    }
+
+    const overallAssessmentScore =
+      totalAssessments > 0
+        ? Number((totalScore / totalAssessments).toFixed(2))
+        : 0;
+
+    await this.prisma.user.update({
+      where: {
+        id: candidateId,
+      },
+
+      data: {
+        overallSkillScores,
+        overallAssessmentScore,
+      },
+    });
   }
 }

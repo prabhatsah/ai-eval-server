@@ -89,13 +89,11 @@ export class AssessmentService {
           Prisma.JsonNull) as Prisma.InputJsonValue,
         focusAreas: (jd.focusAreas ?? Prisma.JsonNull) as Prisma.InputJsonValue,
         durationMinutes,
-
         status: 'PENDING_REVIEW',
-
         mcqs: {
           create: generated.mcqs.map((mcq) => ({
             question: mcq.question,
-            skill: mcq.skill,
+            skills: mcq.skills,
             options: mcq.options,
             correctAnswer: mcq.correctAnswer,
             explanation: mcq.explanation,

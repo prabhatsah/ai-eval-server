@@ -99,7 +99,7 @@ OUTPUT FORMAT
   "mcqs": [
     {
       "question": "string",
-      "skill": "string",
+      "skills": ["NestJS","Prisma"],
       "options": ["A", "B", "C", "D"],
       "correctAnswer": "string",
       "difficulty": "EASY|MEDIUM|HARD",

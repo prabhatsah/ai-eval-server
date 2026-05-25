@@ -779,16 +779,37 @@
           "candidateAssessmentId"
         ]
       },
+      "McqAnswerDto": {
+        "type": "object",
+        "properties": {
+          "mcqQuestionId": {
+            "type": "string"
+          },
+          "selectedOption": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mcqQuestionId",
+          "selectedOption"
+        ]
+      },
       "SubmitAssessmentDto": {
         "type": "object",
         "properties": {
           "candidateAssessmentId": {
-            "type": "string",
-            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McqAnswerDto"
+            }
           }
         },
         "required": [
-          "candidateAssessmentId"
+          "candidateAssessmentId",
+          "answers"
         ]
       }
     }

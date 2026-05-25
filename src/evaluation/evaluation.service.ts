@@ -1,49 +1,162 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateEvaluationDto } from './dto/create-evaluation.dto';
-import {
-  EvaluationConfigSchema,
-  EvaluationSchema,
-} from './validators/evaluation.schema';
-import { z } from 'zod';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class EvaluationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async createEvaluation(dto: CreateEvaluationDto, userId: string) {
-    const config = EvaluationConfigSchema.parse({
-      sections: dto.sections,
-      passingScore: dto.passingScore,
-    });
+  async evaluateMcqs(payload: {
+    candidateAssessmentId: string;
 
-    return this.prisma.evaluation.create({
-      data: {
-        title: dto.title,
-        skill: dto.skill,
-        config,
-        createdBy: userId,
+    answers: {
+      mcqQuestionId: string;
+      selectedOption: string;
+    }[];
+  }) {
+    //////////////////////////////////////////////////////
+    // FETCH QUESTIONS
+    //////////////////////////////////////////////////////
+
+    const questionIds = payload.answers.map((answer) => answer.mcqQuestionId);
+
+    const questions = await this.prisma.mcqQuestion.findMany({
+      where: {
+        id: {
+          in: questionIds,
+        },
       },
     });
-  }
 
-  async getAllEvaluations() {
-    const evaluations = await this.prisma.evaluation.findMany({
-      orderBy: { createdAt: 'desc' },
+    if (!questions.length) {
+      throw new NotFoundException('Questions not found');
+    }
+
+    //////////////////////////////////////////////////////
+    // MAP QUESTIONS
+    //////////////////////////////////////////////////////
+
+    const questionMap = new Map(
+      questions.map((question) => [question.id, question]),
+    );
+
+    //////////////////////////////////////////////////////
+    // EVALUATION
+    //////////////////////////////////////////////////////
+
+    let correct = 0;
+
+    const skillMap: Record<
+      string,
+      {
+        total: number;
+        correct: number;
+      }
+    > = {};
+
+    const responses = payload.answers.map((answer) => {
+      const question = questionMap.get(answer.mcqQuestionId);
+
+      if (!question) {
+        throw new NotFoundException(
+          `Question ${answer.mcqQuestionId} not found`,
+        );
+      }
+
+      //////////////////////////////////////////////////
+      // CHECK ANSWER
+      //////////////////////////////////////////////////
+
+      const isCorrect = question.correctAnswer === answer.selectedOption;
+
+      if (isCorrect) {
+        correct++;
+      }
+
+      //////////////////////////////////////////////////
+      // SKILL ANALYTICS
+      //////////////////////////////////////////////////
+
+      const skills = (question.skills as string[]) || [];
+
+      for (const skill of skills) {
+        //////////////////////////////////////////////////
+        // INIT SKILL
+        //////////////////////////////////////////////////
+
+        if (!skillMap[skill]) {
+          skillMap[skill] = {
+            total: 0,
+            correct: 0,
+          };
+        }
+
+        //////////////////////////////////////////////////
+        // TOTAL
+        //////////////////////////////////////////////////
+
+        skillMap[skill].total += 1;
+
+        //////////////////////////////////////////////////
+        // CORRECT
+        //////////////////////////////////////////////////
+
+        if (isCorrect) {
+          skillMap[skill].correct += 1;
+        }
+      }
+
+      //////////////////////////////////////////////////
+      // RESPONSE
+      //////////////////////////////////////////////////
+
+      return {
+        mcqQuestionId: question.id,
+
+        selectedOption: answer.selectedOption,
+
+        isCorrect,
+
+        score: isCorrect ? 1 : 0,
+      };
     });
 
-    if (evaluations.length == 0) return null;
+    //////////////////////////////////////////////////////
+    // SCORE
+    //////////////////////////////////////////////////////
 
-    return z.array(EvaluationSchema).parse(evaluations);
-  }
+    const totalQuestions = payload.answers.length;
 
-  async getEvaluationById(id: string) {
-    const evaluation = await this.prisma.evaluation.findUnique({
-      where: { id },
-    });
+    const percentage =
+      totalQuestions > 0
+        ? Number(((correct / totalQuestions) * 100).toFixed(2))
+        : 0;
 
-    if (!evaluation) return null;
+    //////////////////////////////////////////////////////
+    // SKILL BREAKDOWN
+    //////////////////////////////////////////////////////
 
-    return EvaluationSchema.parse(evaluation);
+    const skillBreakdown: Record<string, number> = {};
+
+    for (const skill in skillMap) {
+      const data = skillMap[skill];
+
+      skillBreakdown[skill] = Number(
+        ((data.correct / data.total) * 100).toFixed(2),
+      );
+    }
+
+    //////////////////////////////////////////////////////
+    // RETURN
+    //////////////////////////////////////////////////////
+
+    return {
+      responses,
+      totalQuestions,
+      correct,
+      wrong: totalQuestions - correct,
+      percentage,
+      skillBreakdown,
+    };
   }
 }

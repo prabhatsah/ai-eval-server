@@ -52,22 +52,25 @@ model User {
   experienceYears Float?
   currentRole     String?
 
+  overallSkillScores     Json?
+  overallAssessmentScore Float?
+
   refreshToken String?
 
   candidateAssessment CandidateAssessment[]
 }
 
 // EVALUATION
-model Evaluation {
-  id        String   @id @default(uuid())
-  title     String
-  skill     String
-  config    Json
-  createdBy String
-  createdAt DateTime @default(now())
+// model Evaluation {
+//   id        String   @id @default(uuid())
+//   title     String
+//   skill     String
+//   config    Json
+//   createdBy String
+//   createdAt DateTime @default(now())
 
-  candidateAssessment CandidateAssessment[]
-}
+//   candidateAssessment CandidateAssessment[]
+// }
 
 // CANDIDATE ASSESSMENT
 model CandidateAssessment {
@@ -85,6 +88,8 @@ model CandidateAssessment {
   aiScore     Float?
   finalScore  Float?
 
+  skillBreakdown Json?
+
   startedAt   DateTime?
   submittedAt DateTime?
   evaluatedAt DateTime?
@@ -97,7 +102,7 @@ model CandidateAssessment {
   updatedAt DateTime @updatedAt
 
   responses    Response[]
-  evaluation   Evaluation? @relation(fields: [evaluationId], references: [id])
+  // evaluation   Evaluation? @relation(fields: [evaluationId], references: [id])
   evaluationId String?
 
   @@unique([candidateId, assessmentId])
@@ -112,8 +117,7 @@ model Response {
   id String @id @default(uuid())
 
   candidateAssessmentId String
-
-  candidateAssessment CandidateAssessment @relation(fields: [candidateAssessmentId], references: [id])
+  candidateAssessment   CandidateAssessment @relation(fields: [candidateAssessmentId], references: [id])
 
   mcqQuestionId    String?
   codingQuestionId String?
@@ -219,7 +223,7 @@ model McqQuestion {
   assessment   Assessment @relation(fields: [assessmentId], references: [id])
 
   question String
-  skill    String?
+  skills   Json
 
   options       Json
   correctAnswer String
@@ -230,7 +234,6 @@ model McqQuestion {
   createdAt DateTime @default(now())
 
   @@index([assessmentId])
-  @@index([skill])
 }
 
 // CODING QUESTIONS

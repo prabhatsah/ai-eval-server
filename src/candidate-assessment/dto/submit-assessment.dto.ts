@@ -1,11 +1,29 @@
-import { IsUUID } from 'class-validator';
+import { IsArray, IsString, IsUUID, ValidateNested } from 'class-validator';
+
+import { Type } from 'class-transformer';
 
 import { ApiProperty } from '@nestjs/swagger';
 
+class McqAnswerDto {
+  @ApiProperty()
+  @IsUUID()
+  mcqQuestionId: string;
+
+  @ApiProperty()
+  @IsString()
+  selectedOption: string;
+}
+
 export class SubmitAssessmentDto {
-  @ApiProperty({
-    example: '1203e303-762a-4a36-8271-b2f43ba83991',
-  })
+  @ApiProperty()
   @IsUUID()
   candidateAssessmentId: string;
+
+  @ApiProperty({
+    type: [McqAnswerDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => McqAnswerDto)
+  answers: McqAnswerDto[];
 }
