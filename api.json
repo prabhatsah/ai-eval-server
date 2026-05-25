@@ -526,6 +526,41 @@
           "Candidate Assessments"
         ]
       }
+    },
+    "/resume/upload": {
+      "post": {
+        "description": "Upload the resume",
+        "operationId": "ResumeController_uploadResume",
+        "parameters": [
+          {
+            "name": "x-llm-provider",
+            "required": true,
+            "in": "header",
+            "description": "LLM Provider [ gemini | openai ]",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "required": true,
+            "in": "header",
+            "description": "Your Api Key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Upload the resume",
+        "tags": [
+          "Resume"
+        ]
+      }
     }
   },
   "info": {

@@ -39,10 +39,7 @@ enum CandidateAssessmentStatus {
   CANCELLED
 }
 
-//////////////////////////////////////////////////////
 // USER
-//////////////////////////////////////////////////////
-
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -51,14 +48,16 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
+  skills          Json?
+  experienceYears Float?
+  currentRole     String?
+
   refreshToken String?
 
   candidateAssessment CandidateAssessment[]
 }
 
-//////////////////////////////////////////////////////
 // EVALUATION
-//////////////////////////////////////////////////////
 model Evaluation {
   id        String   @id @default(uuid())
   title     String
@@ -70,10 +69,7 @@ model Evaluation {
   candidateAssessment CandidateAssessment[]
 }
 
-//////////////////////////////////////////////////////
 // CANDIDATE ASSESSMENT
-//////////////////////////////////////////////////////
-
 model CandidateAssessment {
   id          String @id @default(uuid())
   candidateId String
@@ -111,10 +107,7 @@ model CandidateAssessment {
   @@index([finalScore])
 }
 
-//////////////////////////////////////////////////////
 // RESPONSE
-//////////////////////////////////////////////////////
-
 model Response {
   id String @id @default(uuid())
 
@@ -177,10 +170,7 @@ model JobDescription {
   @@index([isLatest])
 }
 
-//////////////////////////////////////////////////////
 // ASSESSMENT (SNAPSHOT OF JD VERSION)
-//////////////////////////////////////////////////////
-
 model Assessment {
   id String @id @default(uuid())
 
@@ -221,10 +211,7 @@ model Assessment {
   @@index([reviewScore])
 }
 
-//////////////////////////////////////////////////////
 // MCQ QUESTIONS
-//////////////////////////////////////////////////////
-
 model McqQuestion {
   id String @id @default(uuid())
 
@@ -246,10 +233,7 @@ model McqQuestion {
   @@index([skill])
 }
 
-//////////////////////////////////////////////////////
 // CODING QUESTIONS
-//////////////////////////////////////////////////////
-
 model CodingQuestion {
   id String @id @default(uuid())
 

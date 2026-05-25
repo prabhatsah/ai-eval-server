@@ -44,8 +44,6 @@ export class JdParserAgent {
           throw error;
         }
 
-        console.error('[JD PARSER ERROR]', error.message);
-
         retries--;
 
         if (retries === 0) {

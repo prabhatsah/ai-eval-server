@@ -61,7 +61,6 @@ describe('UserService', () => {
     mockPrisma.user.findUnique.mockResolvedValue(user);
 
     const result = await service.findById(user.id);
-    console.log('result:', result);
 
     expect(result).toEqual(user);
     expect(prisma.user.findUnique).toHaveBeenCalledWith({

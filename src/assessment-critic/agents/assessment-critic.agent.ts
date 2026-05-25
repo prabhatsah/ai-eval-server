@@ -51,7 +51,7 @@ export class AssessmentCriticAgent {
           throw error;
         }
 
-        console.error('[ASSESSMENT CRITIC ERROR]', error.message);
+        // console.error('[ASSESSMENT CRITIC ERROR]', error.message);
 
         retries--;
 

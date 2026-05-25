@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { JdModule } from './jd/jd.module';
 import { AssessmentModule } from './assessment/assessment.module';
 import { CandidateAssessmentModule } from './candidate-assessment/candidate-assessment.module';
+import { ResumeModule } from './resume/resume.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CandidateAssessmentModule } from './candidate-assessment/candidate-asse
     JdModule,
     AssessmentModule,
     CandidateAssessmentModule,
+    ResumeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

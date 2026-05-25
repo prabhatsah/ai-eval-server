@@ -7,7 +7,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AssignAssessmentDto } from '../dto/assign-assessment.dto';
 import { CandidateAssessmentSchema } from '../validators/candidate-assessment.schema';
-import { AssessmentStatus } from '@prisma/client';
+import { AssessmentStatus, CandidateAssessmentStatus } from '@prisma/client';
 
 @Injectable()
 export class CandidateAssessmentService {
@@ -88,7 +88,7 @@ export class CandidateAssessmentService {
     }
 
     // STATUS VALIDATION
-    if (assignment.status !== 'ASSIGNED') {
+    if (assignment.status !== CandidateAssessmentStatus.ASSIGNED) {
       throw new BadRequestException('Assessment cannot be started');
     }
 
@@ -100,7 +100,7 @@ export class CandidateAssessmentService {
         },
 
         data: {
-          status: 'EXPIRED',
+          status: CandidateAssessmentStatus.EXPIRED,
         },
       });
 
@@ -114,8 +114,7 @@ export class CandidateAssessmentService {
       },
 
       data: {
-        status: 'IN_PROGRESS',
-
+        status: CandidateAssessmentStatus.IN_PROGRESS,
         startedAt: new Date(),
       },
     });
@@ -132,6 +131,13 @@ export class CandidateAssessmentService {
       where: {
         id: candidateAssessmentId,
       },
+      include: {
+        assessment: {
+          select: {
+            durationMinutes: true,
+          },
+        },
+      },
     });
 
     if (!assignment) {
@@ -139,8 +145,38 @@ export class CandidateAssessmentService {
     }
 
     // STATUS VALIDATION
-    if (assignment.status !== 'IN_PROGRESS') {
+    if (assignment.status !== CandidateAssessmentStatus.IN_PROGRESS) {
       throw new BadRequestException('Assessment is not in progress');
+    }
+
+    // START VALIDATION
+    if (!assignment.startedAt) {
+      throw new BadRequestException('Assessment start time missing');
+    }
+
+    // DURATION VALIDATION
+    const duration = assignment.assessment?.durationMinutes;
+
+    if (duration) {
+      const expiresAt = new Date(
+        assignment.startedAt.getTime() + duration * 60 * 1000,
+      );
+
+      const now = new Date();
+
+      if (now > expiresAt) {
+        await this.prisma.candidateAssessment.update({
+          where: {
+            id: assignment.id,
+          },
+
+          data: {
+            status: CandidateAssessmentStatus.EXPIRED,
+          },
+        });
+
+        throw new BadRequestException('Assessment duration exceeded');
+      }
     }
 
     // SUBMIT
@@ -151,7 +187,6 @@ export class CandidateAssessmentService {
 
       data: {
         status: 'SUBMITTED',
-
         submittedAt: new Date(),
       },
     });
