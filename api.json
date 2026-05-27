@@ -181,7 +181,7 @@
     "/jd": {
       "post": {
         "description": "Parses a raw JD and stores structured data in database",
-        "operationId": "JdController_createJd",
+        "operationId": "JdController_parseJd",
         "parameters": [
           {
             "name": "x-llm-provider",
@@ -205,9 +205,18 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/CreateJdDto"
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -224,7 +233,7 @@
             }
           }
         },
-        "summary": "Create and parse a job description",
+        "summary": "Parse a job description",
         "tags": [
           "Job Description"
         ]
@@ -665,19 +674,6 @@
           "createdAt"
         ]
       },
-      "CreateJdDto": {
-        "type": "object",
-        "properties": {
-          "jd": {
-            "type": "string",
-            "example": "We are looking for a Backend Engineer...",
-            "description": "Full job description text"
-          }
-        },
-        "required": [
-          "jd"
-        ]
-      },
       "JdResponseDto": {
         "type": "object",
         "properties": {
@@ -785,13 +781,16 @@
           "mcqQuestionId": {
             "type": "string"
           },
-          "selectedOption": {
-            "type": "string"
+          "selectedOptionIndex": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3,
+            "example": 1
           }
         },
         "required": [
           "mcqQuestionId",
-          "selectedOption"
+          "selectedOptionIndex"
         ]
       },
       "SubmitAssessmentDto": {

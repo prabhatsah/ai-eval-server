@@ -8,10 +8,9 @@ export class EvaluationService {
 
   async evaluateMcqs(payload: {
     candidateAssessmentId: string;
-
     answers: {
       mcqQuestionId: string;
-      selectedOption: string;
+      selectedOptionIndex: number;
     }[];
   }) {
     //////////////////////////////////////////////////////
@@ -67,7 +66,8 @@ export class EvaluationService {
       // CHECK ANSWER
       //////////////////////////////////////////////////
 
-      const isCorrect = question.correctAnswer === answer.selectedOption;
+      const isCorrect =
+        question.correctAnswerIndex === answer.selectedOptionIndex;
 
       if (isCorrect) {
         correct++;
@@ -112,11 +112,8 @@ export class EvaluationService {
 
       return {
         mcqQuestionId: question.id,
-
-        selectedOption: answer.selectedOption,
-
+        selectedOptionIndex: answer.selectedOptionIndex,
         isCorrect,
-
         score: isCorrect ? 1 : 0,
       };
     });

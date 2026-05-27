@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JdParserAgent } from './agents/jd-parser.agent';
+import { extractResumeText } from 'src/resume/utils/resume-text-extractor';
 
 @Injectable()
 export class JdService {
@@ -9,13 +10,16 @@ export class JdService {
     private readonly jdParserAgent: JdParserAgent,
   ) {}
 
-  async createJd(jdText: string, llmProvider: string, apiKey: string) {
+  async parseJd(
+    file: Express.Multer.File,
+    llmProvider: string,
+    apiKey: string,
+  ) {
+    // Extract text
+    const text = await extractResumeText(file);
+
     // Parse JD
-    const parsed = await this.jdParserAgent.parseJD(
-      jdText,
-      llmProvider,
-      apiKey,
-    );
+    const parsed = await this.jdParserAgent.parseJD(text, llmProvider, apiKey);
 
     // Versioning logic
     const jdGroupId = crypto.randomUUID();
@@ -28,7 +32,7 @@ export class JdService {
         jdGroupId,
         version,
         ...parsed,
-        rawText: jdText,
+        rawText: text,
       },
     });
 

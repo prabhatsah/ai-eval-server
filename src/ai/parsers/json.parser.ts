@@ -1,33 +1,49 @@
 import { ZodType } from 'zod';
 
 export function parseJsonSafely<T>(raw: string, schema: ZodType<T>): T {
-  let cleaned;
-
   try {
-    cleaned = raw;
+    let cleaned = raw.trim();
 
-    // Remove markdown variants
-    cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) =>
-      match.replace(/```[a-zA-Z]*\n?/, '').replace(/```$/, ''),
-    );
+    // Remove markdown code fences only if entire response is fenced
+    cleaned = cleaned
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/, '');
 
-    // Extract only JSON between first { and last }
+    // Attempt direct parse first
+    try {
+      const parsed = JSON.parse(cleaned);
+
+      return schema.parse(parsed);
+    } catch {}
+
+    // Fallback: extract largest JSON object
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
 
     if (firstBrace === -1 || lastBrace === -1) {
-      throw new Error('No JSON found in response');
+      throw new Error('No JSON object found');
     }
 
-    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
 
     const parsed = JSON.parse(cleaned);
 
     return schema.parse(parsed);
   } catch (error: any) {
-    // console.error('RAW RESPONSE:', raw);
-    // console.error('CLEANED:', cleaned);
+    // console.error('\n===== RAW LLM RESPONSE =====\n');
+    // console.error(raw);
 
-    throw new Error(`Invalid JSON response from LLM+`);
+    // console.error('\n===== ERROR =====\n');
+    // console.error(error);
+
+    // Important:
+    // surface zod errors too
+    if (error?.issues) {
+      // console.error('\n===== ZOD ISSUES =====\n');
+      // console.dir(error.issues, { depth: null });
+    }
+
+    throw error;
   }
 }

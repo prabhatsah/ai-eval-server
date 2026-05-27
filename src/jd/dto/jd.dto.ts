@@ -9,7 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateJdDto {
+export class ParseJdDto {
   @ApiProperty({
     example: 'We are looking for a Backend Engineer...',
     description: 'Full job description text',

@@ -122,8 +122,9 @@ model Response {
   mcqQuestionId    String?
   codingQuestionId String?
 
-  selectedOption String?
-  codingAnswer   String?
+  selectedOptionIndex Int?
+
+  codingAnswer String?
 
   isCorrect  Boolean?
   score      Float?
@@ -225,8 +226,8 @@ model McqQuestion {
   question String
   skills   Json
 
-  options       Json
-  correctAnswer String
+  options            Json
+  correctAnswerIndex Int
 
   difficulty  Difficulty
   explanation String?
@@ -240,20 +241,24 @@ model McqQuestion {
 model CodingQuestion {
   id String @id @default(uuid())
 
-  assessmentId String
-  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  title   String
+  problem String
 
-  title       String
-  problem     String
   constraints String?
 
-  sampleInput      String?
-  sampleOutput     String?
+  sampleCases Json
+
+  hiddenTestCases Json
+
   expectedApproach String?
+
+  timeComplexity  String?
+  spaceComplexity String?
 
   difficulty Difficulty
 
-  createdAt DateTime @default(now())
-
-  @@index([assessmentId])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  assessment   Assessment? @relation(fields: [assessmentId], references: [id])
+  assessmentId String?
 }

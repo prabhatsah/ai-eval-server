@@ -6,8 +6,7 @@ export const EvaluateMcqSchema = z.object({
   answers: z.array(
     z.object({
       mcqQuestionId: z.uuid(),
-
-      selectedOption: z.string(),
+      selectedOptionIndex: z.int(),
     }),
   ),
 });

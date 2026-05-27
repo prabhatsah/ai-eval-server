@@ -8,6 +8,9 @@ import {
   Param,
   NotFoundException,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Req,
 } from '@nestjs/common';
 
 import {
@@ -17,11 +20,14 @@ import {
   ApiBody,
   ApiResponse,
   ApiParam,
+  ApiConsumes,
 } from '@nestjs/swagger';
 
 import { JdService } from './jd.service';
-import { CreateJdDto, JdResponseDto } from './dto/jd.dto';
+import { ParseJdDto, JdResponseDto } from './dto/jd.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 @ApiTags('Job Description')
 @Controller('jd')
@@ -33,8 +39,21 @@ export class JdController {
   ========================= */
   @Post()
   @ApiOperation({
-    summary: 'Create and parse a job description',
+    summary: 'Parse a job description',
     description: 'Parses a raw JD and stores structured data in database',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['file'],
+    },
   })
   @ApiHeader({
     name: 'x-llm-provider',
@@ -44,15 +63,17 @@ export class JdController {
     name: 'x-api-key',
     description: 'Your Api Key',
   })
-  @ApiBody({
-    type: CreateJdDto,
-  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
   @ApiResponse({
     status: 200,
     type: JdResponseDto,
   })
-  async createJd(
-    @Body() body: CreateJdDto,
+  async parseJd(
+    @UploadedFile() file: Express.Multer.File,
     @Headers('x-llm-provider') llmProvider: string,
     @Headers('x-api-key') apiKey?: string,
   ) {
@@ -64,11 +85,7 @@ export class JdController {
       throw new BadRequestException('API key is missing');
     }
 
-    if (!body.jd) {
-      throw new BadRequestException('JD text is required');
-    }
-
-    return this.jdService.createJd(body.jd, llmProvider, apiKey);
+    return this.jdService.parseJd(file, llmProvider, apiKey);
   }
 
   /* =========================

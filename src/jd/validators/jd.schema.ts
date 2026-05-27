@@ -16,9 +16,9 @@ export const JobDescriptionSchema = z.object({
   focusAreas: z.array(z.string()).optional(),
 });
 
-export const CreateJdSchema = z.object({
+export const ParseJdSchema = z.object({
   jd: z.string().min(10),
 });
 
 export type JobDescriptionInput = z.infer<typeof JobDescriptionSchema>;
-export type CreateJdInput = z.infer<typeof CreateJdSchema>;
+export type ParseJdInput = z.infer<typeof ParseJdSchema>;

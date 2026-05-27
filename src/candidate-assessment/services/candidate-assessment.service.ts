@@ -194,7 +194,7 @@ export class CandidateAssessmentService {
       data: evaluated.responses.map((response) => ({
         candidateAssessmentId: dto.candidateAssessmentId,
         mcqQuestionId: response.mcqQuestionId,
-        selectedOption: response.selectedOption,
+        selectedOptionIndex: response.selectedOptionIndex,
         isCorrect: response.isCorrect,
         score: response.score,
       })),
@@ -259,26 +259,26 @@ export class CandidateAssessmentService {
                 options: true,
               },
             },
-
             codingQuestions: {
               select: {
                 id: true,
                 title: true,
                 problem: true,
                 constraints: true,
-                sampleInput: true,
-                sampleOutput: true,
+                sampleCases: true,
+                expectedApproach: true,
+                timeComplexity: true,
+                spaceComplexity: true,
               },
             },
           },
         },
-
         responses: {
           select: {
             id: true,
             mcqQuestionId: true,
             codingQuestionId: true,
-            selectedOption: true,
+            selectedOptionIndex: true,
             isCorrect: true,
             codingAnswer: true,
             createdAt: true,
