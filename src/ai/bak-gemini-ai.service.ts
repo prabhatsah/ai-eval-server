@@ -40,9 +40,6 @@ export class GeminiService {
 
       const data = await res.json();
 
-      //   console.log('response:', data);
-      console.log('res1:', data.response);
-
       return data.response;
     } catch (error: any) {
       console.log('error:', error);

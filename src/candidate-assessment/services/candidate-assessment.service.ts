@@ -184,11 +184,10 @@ export class CandidateAssessmentService {
     // EVALUATE
     const evaluated = await this.evaluationService.evaluateMcqs({
       candidateAssessmentId: dto.candidateAssessmentId,
-
       answers: dto.answers,
     });
 
-    console.log('evaluated:', evaluated);
+    // console.log('evaluated:', evaluated);
 
     // SAVE RESPONSES
     await this.prisma.response.createMany({
@@ -280,6 +279,7 @@ export class CandidateAssessmentService {
             mcqQuestionId: true,
             codingQuestionId: true,
             selectedOption: true,
+            isCorrect: true,
             codingAnswer: true,
             createdAt: true,
             updatedAt: true,
