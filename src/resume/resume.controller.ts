@@ -8,7 +8,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiHeader,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ResumeService } from './resume.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -26,6 +32,19 @@ export class ResumeController {
   @ApiOperation({
     summary: 'Upload the resume',
     description: 'Upload the resume',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['file'],
+    },
   })
   @ApiHeader({
     name: 'x-llm-provider',
