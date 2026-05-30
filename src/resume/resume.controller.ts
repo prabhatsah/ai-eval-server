@@ -41,7 +41,7 @@ export class ResumeController {
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.MANAGER)
+  @Roles(Role.CANDIDATE)
   async uploadResume(
     @UploadedFile()
     file: Express.Multer.File,
