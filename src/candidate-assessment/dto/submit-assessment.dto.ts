@@ -16,12 +16,12 @@ class McqAnswerDto {
   mcqQuestionId: string;
 
   @ApiProperty({
-    minimum: 0,
+    minimum: -1,
     maximum: 3,
     example: 1,
   })
   @IsInt()
-  @Min(0)
+  @Min(-1)
   @Max(3)
   selectedOptionIndex: number;
 }
