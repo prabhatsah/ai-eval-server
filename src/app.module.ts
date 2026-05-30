@@ -23,7 +23,7 @@ import { EvaluationModule } from './evaluation/evaluation.module';
     AssessmentModule,
     EvaluationModule,
     CandidateAssessmentModule,
-    // ResumeModule,
+    ResumeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

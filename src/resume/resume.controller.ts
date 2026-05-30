@@ -13,6 +13,9 @@ import { ResumeService } from './resume.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/roles/roles.guard';
+import { Role } from '@prisma/client';
 
 @ApiTags('Resume')
 @Controller('resume')
@@ -37,7 +40,8 @@ export class ResumeController {
       storage: memoryStorage(),
     }),
   )
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
   async uploadResume(
     @UploadedFile()
     file: Express.Multer.File,

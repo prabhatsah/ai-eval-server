@@ -16,6 +16,7 @@ import {
   CandidateDetailedResultSchema,
 } from '../validators/manager-candidate-assessment.schema';
 import { JwtUser } from 'src/auth/interfaces/jwt-payload.interface';
+import { duration } from 'zod/v4/classic/iso.cjs';
 
 @Injectable()
 export class CandidateAssessmentService {
@@ -343,6 +344,10 @@ export class CandidateAssessmentService {
 
     return assessments.map((assessment) => ({
       assessmentId: assessment.id,
+      assessmentCode: assessment.assessmentCode,
+      durationMinutes: assessment.durationMinutes,
+      primarySkills: assessment.primarySkills,
+      secondarySkills: assessment.secondarySkills,
       role: assessment.role,
       difficulty: assessment.difficulty,
       mcqCount: assessment.mcqCount,
@@ -397,6 +402,10 @@ export class CandidateAssessmentService {
       assessment: {
         id: assignment.assessment.id,
         role: assignment.assessment.role,
+        assessmentCode: assignment.assessment.assessmentCode,
+        durationMinutes: assignment.assessment.durationMinutes,
+        primarySkills: assignment.assessment.primarySkills,
+        secondarySkills: assignment.assessment.secondarySkills,
         difficulty: assignment.assessment.difficulty,
         mcqCount: assignment.assessment.mcqCount,
         codingCount: assignment.assessment.codingCount,
@@ -445,11 +454,13 @@ export class CandidateAssessmentService {
           select: {
             id: true,
             assessmentCode: true,
+            durationMinutes: true,
             role: true,
             difficulty: true,
             mcqCount: true,
             codingCount: true,
             primarySkills: true,
+            secondarySkills: true,
             focusAreas: true,
           },
         },
@@ -481,13 +492,13 @@ export class CandidateAssessmentService {
           select: {
             id: true,
             assessmentCode: true,
+            durationMinutes: true,
             role: true,
             difficulty: true,
             mcqCount: true,
             codingCount: true,
             primarySkills: true,
             focusAreas: true,
-
             mcqs: {
               select: {
                 id: true,
@@ -501,7 +512,6 @@ export class CandidateAssessmentService {
                 createdAt: 'asc',
               },
             },
-
             codingQuestions: {
               select: {
                 id: true,
@@ -553,13 +563,14 @@ export class CandidateAssessmentService {
           select: {
             id: true,
             assessmentCode: true,
+            durationMinutes: true,
             role: true,
             difficulty: true,
             mcqCount: true,
             codingCount: true,
             primarySkills: true,
+            secondarySkills: true,
             focusAreas: true,
-
             mcqs: {
               select: {
                 id: true,
@@ -573,7 +584,6 @@ export class CandidateAssessmentService {
                 createdAt: 'asc',
               },
             },
-
             codingQuestions: {
               select: {
                 id: true,
