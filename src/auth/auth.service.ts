@@ -4,14 +4,12 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { Role } from '@prisma/client';
-import { JwtPayload } from './types/auth.types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AccessTokenPayload,
-  AccessTokenSchema,
   RefreshTokenPayload,
 } from './validators/token.schema';
+import { JwtUser } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -73,7 +71,7 @@ export class AuthService {
 
   async getUserInfo(accessToken: string) {
     try {
-      const payload = this.jwtService.verify<JwtPayload>(accessToken, {
+      const payload = this.jwtService.verify<JwtUser>(accessToken, {
         secret: process.env.JWT_ACCESS_SECRET,
       });
       return payload;
@@ -131,7 +129,7 @@ export class AuthService {
 
   generateAccessTokens(payload: AccessTokenPayload) {
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '5m',
+      expiresIn: '60m',
       secret: process.env.JWT_ACCESS_SECRET,
     });
     return accessToken;
@@ -156,7 +154,7 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    const payload = this.jwtService.verify<JwtPayload>(refreshToken, {
+    const payload = this.jwtService.verify<JwtUser>(refreshToken, {
       secret: process.env.JWT_REFRESH_SECRET,
     });
 

@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JdParserAgent } from './agents/jd-parser.agent';
 import { extractResumeText } from 'src/resume/utils/resume-text-extractor';
+import { userIdParamSchema } from 'src/user/validators/user.schema';
+import { JwtUser } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JdService {
@@ -12,9 +14,21 @@ export class JdService {
 
   async parseJd(
     file: Express.Multer.File,
+    user: JwtUser,
     llmProvider: string,
     apiKey: string,
   ) {
+    if (!user.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    if (!llmProvider) {
+      throw new BadRequestException('LLM provider is missing');
+    }
+
+    if (!apiKey) {
+      throw new BadRequestException('API key is missing');
+    }
     // Extract text
     const text = await extractResumeText(file);
 
@@ -30,6 +44,7 @@ export class JdService {
     const jd = await this.prisma.jobDescription.create({
       data: {
         jdGroupId,
+        createdById: user.userId,
         version,
         ...parsed,
         rawText: text,
@@ -39,9 +54,9 @@ export class JdService {
     return jd;
   }
 
-  async getById(id: string) {
+  async getById(id: string, user: JwtUser) {
     return this.prisma.jobDescription.findUnique({
-      where: { id },
+      where: { id, createdById: user.userId },
     });
   }
 
@@ -54,8 +69,9 @@ export class JdService {
     });
   }
 
-  async getAll() {
+  async getAll(user: JwtUser) {
     return this.prisma.jobDescription.findMany({
+      where: { createdById: user.userId },
       orderBy: {
         createdAt: 'desc',
       },

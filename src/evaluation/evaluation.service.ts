@@ -31,18 +31,12 @@ export class EvaluationService {
       throw new NotFoundException('Questions not found');
     }
 
-    //////////////////////////////////////////////////////
     // MAP QUESTIONS
-    //////////////////////////////////////////////////////
-
     const questionMap = new Map(
       questions.map((question) => [question.id, question]),
     );
 
-    //////////////////////////////////////////////////////
     // EVALUATION
-    //////////////////////////////////////////////////////
-
     let correct = 0;
 
     const skillMap: Record<
@@ -62,10 +56,7 @@ export class EvaluationService {
         );
       }
 
-      //////////////////////////////////////////////////
-      // CHECK ANSWER
-      //////////////////////////////////////////////////
-
+      // CHECK ANSWER/////////////////////////////////
       const isCorrect =
         question.correctAnswerIndex === answer.selectedOptionIndex;
 
@@ -73,17 +64,11 @@ export class EvaluationService {
         correct++;
       }
 
-      //////////////////////////////////////////////////
       // SKILL ANALYTICS
-      //////////////////////////////////////////////////
-
       const skills = (question.skills as string[]) || [];
 
       for (const skill of skills) {
-        //////////////////////////////////////////////////
         // INIT SKILL
-        //////////////////////////////////////////////////
-
         if (!skillMap[skill]) {
           skillMap[skill] = {
             total: 0,
@@ -91,10 +76,7 @@ export class EvaluationService {
           };
         }
 
-        //////////////////////////////////////////////////
         // TOTAL
-        //////////////////////////////////////////////////
-
         skillMap[skill].total += 1;
 
         //////////////////////////////////////////////////

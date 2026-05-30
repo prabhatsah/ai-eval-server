@@ -28,6 +28,14 @@ import { ParseJdDto, JdResponseDto } from './dto/jd.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import {
+  JwtUser,
+  RequestWithUser,
+} from 'src/auth/interfaces/jwt-payload.interface';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+import { RolesGuard } from 'src/auth/roles/roles.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Job Description')
 @Controller('jd')
@@ -72,20 +80,15 @@ export class JdController {
     status: 200,
     type: JdResponseDto,
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
   async parseJd(
     @UploadedFile() file: Express.Multer.File,
     @Headers('x-llm-provider') llmProvider: string,
-    @Headers('x-api-key') apiKey?: string,
+    @Headers('x-api-key') apiKey: string,
+    @CurrentUser() user: JwtUser,
   ) {
-    if (!llmProvider) {
-      throw new BadRequestException('LLM provider is missing');
-    }
-
-    if (!apiKey) {
-      throw new BadRequestException('API key is missing');
-    }
-
-    return this.jdService.parseJd(file, llmProvider, apiKey);
+    return this.jdService.parseJd(file, user, llmProvider, apiKey);
   }
 
   /* =========================
@@ -104,8 +107,10 @@ export class JdController {
     status: 200,
     type: JdResponseDto,
   })
-  async getById(@Param('id') id: string) {
-    const jd = await this.jdService.getById(id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
+  async getById(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    const jd = await this.jdService.getById(id, user);
 
     if (!jd) {
       throw new NotFoundException('JD not found');
@@ -125,20 +130,23 @@ export class JdController {
   @ApiParam({
     name: 'groupId',
   })
-  async getLatest(@Param('groupId') groupId: string) {
+  async getLatest(
+    @Param('groupId') groupId: string,
+    @CurrentUser() user: JwtUser,
+  ) {
     return this.jdService.getLatestByGroup(groupId);
   }
 
   /* =========================
      GET ALL JDs
   ========================= */
-
-  // @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({
     summary: 'Get all job descriptions',
   })
-  async getAll() {
-    return this.jdService.getAll();
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
+  async getAll(@CurrentUser() user: JwtUser) {
+    return this.jdService.getAll(user);
   }
 }

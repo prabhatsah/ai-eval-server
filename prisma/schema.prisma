@@ -57,7 +57,10 @@ model User {
 
   refreshToken String?
 
-  candidateAssessment CandidateAssessment[]
+  jobDescriptions             JobDescription[]
+  assessments                 Assessment[]
+  candidateAssessments        CandidateAssessment[] @relation("CandidateAssessments")
+  createdCandidateAssessments CandidateAssessment[] @relation("CreatedCandidateAssessments")
 }
 
 // EVALUATION
@@ -72,76 +75,7 @@ model User {
 //   candidateAssessment CandidateAssessment[]
 // }
 
-// CANDIDATE ASSESSMENT
-model CandidateAssessment {
-  id          String @id @default(uuid())
-  candidateId String
-  candidate   User   @relation(fields: [candidateId], references: [id])
-
-  assessmentId String
-  assessment   Assessment @relation(fields: [assessmentId], references: [id])
-
-  status CandidateAssessmentStatus @default(ASSIGNED)
-
-  mcqScore    Float?
-  codingScore Float?
-  aiScore     Float?
-  finalScore  Float?
-
-  skillBreakdown Json?
-
-  startedAt   DateTime?
-  submittedAt DateTime?
-  evaluatedAt DateTime?
-  expiresAt   DateTime?
-
-  evaluationSummary String?
-  feedback          Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  responses    Response[]
-  // evaluation   Evaluation? @relation(fields: [evaluationId], references: [id])
-  evaluationId String?
-
-  @@unique([candidateId, assessmentId])
-  @@index([candidateId])
-  @@index([assessmentId])
-  @@index([status])
-  @@index([finalScore])
-}
-
-// RESPONSE
-model Response {
-  id String @id @default(uuid())
-
-  candidateAssessmentId String
-  candidateAssessment   CandidateAssessment @relation(fields: [candidateAssessmentId], references: [id])
-
-  mcqQuestionId    String?
-  codingQuestionId String?
-
-  selectedOptionIndex Int?
-
-  codingAnswer String?
-
-  isCorrect  Boolean?
-  score      Float?
-  aiFeedback String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([candidateAssessmentId])
-  @@index([mcqQuestionId])
-  @@index([codingQuestionId])
-}
-
-//////////////////////////////////////////////////////
 // JOB DESCRIPTION (VERSIONED)
-//////////////////////////////////////////////////////
-
 model JobDescription {
   id String @id @default(uuid())
 
@@ -162,7 +96,11 @@ model JobDescription {
   difficulty      Difficulty
   focusAreas      Json?
 
-  isLatest Boolean @default(true) // ✅ quick access
+  isLatest Boolean @default(true)
+
+  // Creator relation
+  createdById String
+  creator     User   @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -178,6 +116,8 @@ model JobDescription {
 // ASSESSMENT (SNAPSHOT OF JD VERSION)
 model Assessment {
   id String @id @default(uuid())
+
+  assessmentCode String @unique
 
   jobDescriptionId String
   jobDescription   JobDescription @relation(fields: [jobDescriptionId], references: [id])
@@ -201,6 +141,10 @@ model Assessment {
   reviewRecommendation String?
   reviewIssues         Json?
   reviewedAt           DateTime?
+
+  // Creator relation
+  createdById String
+  creator     User   @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -261,4 +205,76 @@ model CodingQuestion {
   updatedAt    DateTime    @updatedAt
   assessment   Assessment? @relation(fields: [assessmentId], references: [id])
   assessmentId String?
+}
+
+// CANDIDATE ASSESSMENT
+model CandidateAssessment {
+  id String @id @default(uuid())
+
+  // Existing candidate relation
+  candidateId String
+  candidate   User   @relation("CandidateAssessments", fields: [candidateId], references: [id])
+
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+
+  status CandidateAssessmentStatus @default(ASSIGNED)
+
+  mcqScore    Float?
+  codingScore Float?
+  aiScore     Float?
+  finalScore  Float?
+
+  skillBreakdown Json?
+
+  startedAt   DateTime?
+  submittedAt DateTime?
+  evaluatedAt DateTime?
+  expiresAt   DateTime?
+
+  evaluationSummary String?
+  feedback          Json?
+
+  // Creator relation
+  createdById String
+  createdBy   User   @relation("CreatedCandidateAssessments", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  responses    Response[]
+  // evaluation   Evaluation? @relation(fields: [evaluationId], references: [id])
+  evaluationId String?
+
+  @@unique([candidateId, assessmentId])
+  @@index([candidateId])
+  @@index([assessmentId])
+  @@index([status])
+  @@index([finalScore])
+}
+
+// RESPONSE
+model Response {
+  id String @id @default(uuid())
+
+  candidateAssessmentId String
+  candidateAssessment   CandidateAssessment @relation(fields: [candidateAssessmentId], references: [id])
+
+  mcqQuestionId    String?
+  codingQuestionId String?
+
+  selectedOptionIndex Int?
+
+  codingAnswer String?
+
+  isCorrect  Boolean?
+  score      Float?
+  aiFeedback String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([candidateAssessmentId])
+  @@index([mcqQuestionId])
+  @@index([codingQuestionId])
 }

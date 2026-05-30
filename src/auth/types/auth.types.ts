@@ -1,11 +1,11 @@
-import { Role } from '@prisma/client';
+// import { Role } from '@prisma/client';
 
-export type JwtPayload = {
-  userId: string;
-  role: Role;
-};
+// export type JwtUser = {
+//   userId: string;
+//   role: Role;
+// };
 
-export type JwtRefreshVerifyPayload = {
-  refreshToken: string;
-  secret: string;
-};
+// export type JwtRefreshVerifyPayload = {
+//   refreshToken: string;
+//   secret: string;
+// };

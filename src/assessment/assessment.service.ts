@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AssessmentAgent } from './agents/assessment.agent';
 import { AssessmentStatus, Difficulty, Prisma } from '@prisma/client';
 import { AssessmentCriticService } from 'src/assessment-critic/assessment-critic.service';
+import { JwtUser } from 'src/auth/interfaces/jwt-payload.interface';
+import { customAlphabet } from 'nanoid';
 
 interface DurationInput {
   mcqCount: number;
@@ -18,30 +24,42 @@ export class AssessmentService {
     private readonly assessmentCriticService: AssessmentCriticService,
   ) {}
 
-  // private readonly assessments: AssessmentEntity[] = [];
-
   async generateAssessment(
     dto: {
       jdId: string;
       mcqCount: number;
       codingCount: number;
     },
+    user: JwtUser,
     llmProvider: string,
     apiKey: string,
   ) {
+    if (!user.userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+
+    if (!llmProvider) {
+      throw new BadRequestException('LLM provider is missing');
+    }
+
+    if (!apiKey) {
+      throw new BadRequestException('API key is missing');
+    }
     const jd = await this.prisma.jobDescription.findUnique({
       where: {
         id: dto.jdId,
+        createdById: user.userId,
       },
     });
 
     if (!jd) {
-      throw new NotFoundException('Job description not found');
+      throw new NotFoundException('JD not found');
     }
 
     const existingAssessment = await this.prisma.assessment.findFirst({
       where: {
         jobDescriptionId: dto.jdId,
+        createdById: user.userId,
       },
     });
 
@@ -49,9 +67,7 @@ export class AssessmentService {
       throw new NotFoundException('Assessment already exist with this jd');
     }
 
-    // =========================
     // GENERATE ASSESSMENT
-    // =========================
     const generated = await this.assessmentAgent.generateAssessment(
       {
         role: jd.role,
@@ -73,12 +89,14 @@ export class AssessmentService {
       difficulty: jd.difficulty,
     });
 
-    // =========================
+    const uniqueAssessmentCode = this.generateAssessmentCode();
+
     // SAVE INITIAL ASSESSMENT
-    // =========================
     const assessment = await this.prisma.assessment.create({
       data: {
         jobDescriptionId: jd.id,
+        assessmentCode: uniqueAssessmentCode,
+        createdById: user.userId,
         role: jd.role,
         difficulty: jd.difficulty,
         experienceYears: jd.experienceYears,
@@ -122,10 +140,7 @@ export class AssessmentService {
       },
     });
 
-    // =========================
     // REVIEW ASSESSMENT
-    // =========================
-
     const review = await this.assessmentCriticService.criticAssessment(
       {
         role: jd.role,
@@ -141,10 +156,7 @@ export class AssessmentService {
       apiKey,
     );
 
-    // =========================
     // UPDATE REVIEW STATUS
-    // =========================
-
     let status: 'APPROVED' | 'NEEDS_REVISION' | 'REJECTED' = 'APPROVED';
 
     if (review.recommendation === 'revise') {
@@ -181,9 +193,13 @@ export class AssessmentService {
     };
   }
 
-  async getAssessment(id: string) {
+  async getAssessment(id: string, user: JwtUser) {
     const assessment = await this.prisma.assessment.findUnique({
-      where: { id, status: AssessmentStatus.APPROVED },
+      where: {
+        id,
+        createdById: user.userId,
+        status: AssessmentStatus.APPROVED,
+      },
       include: {
         mcqs: true,
         codingQuestions: true,
@@ -197,9 +213,9 @@ export class AssessmentService {
     return assessment;
   }
 
-  async getAssessments() {
+  async getAssessments(user: JwtUser) {
     const assessments = this.prisma.assessment.findMany({
-      where: { status: AssessmentStatus.APPROVED },
+      where: { createdById: user.userId, status: AssessmentStatus.APPROVED },
       orderBy: {
         createdAt: 'desc',
       },
@@ -217,9 +233,9 @@ export class AssessmentService {
     return assessments;
   }
 
-  async deleteAssessment(id: string) {
+  async deleteAssessment(id: string, user: JwtUser) {
     const assessment = await this.prisma.assessment.findUnique({
-      where: { id },
+      where: { id, createdById: user.userId },
     });
 
     if (!assessment) {
@@ -270,4 +286,10 @@ export class AssessmentService {
 
     return mcqDuration + codingDuration + buffer;
   };
+
+  generateAssessmentCode() {
+    const nanoid = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 6);
+
+    return `EVAL-${nanoid()}`;
+  }
 }

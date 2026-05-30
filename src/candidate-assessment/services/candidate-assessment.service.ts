@@ -10,6 +10,12 @@ import { CandidateAssessmentSchema } from '../validators/candidate-assessment.sc
 import { AssessmentStatus, CandidateAssessmentStatus } from '@prisma/client';
 import { EvaluationService } from 'src/evaluation/evaluation.service';
 import { SubmitAssessmentDto } from '../dto/submit-assessment.dto';
+import {
+  AssessmentAssignmentOverviewSchema,
+  CandidateByAssessmentSchema,
+  CandidateDetailedResultSchema,
+} from '../validators/manager-candidate-assessment.schema';
+import { JwtUser } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class CandidateAssessmentService {
@@ -22,7 +28,7 @@ export class CandidateAssessmentService {
   // ASSIGN ASSESSMENT
   //////////////////////////////////////////////////////
 
-  async assignAssessment(dto: AssignAssessmentDto) {
+  async assignAssessment(user: JwtUser, dto: AssignAssessmentDto) {
     // CHECK CANDIDATE
     const candidate = await this.prisma.user.findUnique({
       where: {
@@ -38,12 +44,13 @@ export class CandidateAssessmentService {
     const assessment = await this.prisma.assessment.findUnique({
       where: {
         id: dto.assessmentId,
+        createdById: user.userId,
         status: AssessmentStatus.APPROVED,
       },
     });
 
     if (!assessment) {
-      throw new NotFoundException('Assessment not found');
+      throw new NotFoundException('No approved assessment found');
     }
 
     // CHECK DUPLICATE ASSIGNMENT
@@ -64,10 +71,10 @@ export class CandidateAssessmentService {
     const assignment = await this.prisma.candidateAssessment.create({
       data: {
         candidateId: dto.candidateId,
+        createdById: user.userId,
         assessmentId: dto.assessmentId,
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
       },
-
       include: {
         assessment: true,
         candidate: true,
@@ -80,11 +87,11 @@ export class CandidateAssessmentService {
   //////////////////////////////////////////////////////
   // START ASSESSMENT
   //////////////////////////////////////////////////////
-
-  async startAssessment(candidateAssessmentId: string) {
+  async startAssessment(user: JwtUser, candidateAssessmentId: string) {
     const assignment = await this.prisma.candidateAssessment.findUnique({
       where: {
         id: candidateAssessmentId,
+        candidateId: user.userId,
       },
     });
 
@@ -128,10 +135,11 @@ export class CandidateAssessmentService {
   }
 
   // SUBMIT ASSESSMENT
-  async submitAssessment(dto: SubmitAssessmentDto) {
+  async submitAssessment(user: JwtUser, dto: SubmitAssessmentDto) {
     const assignment = await this.prisma.candidateAssessment.findUnique({
       where: {
         id: dto.candidateAssessmentId,
+        candidateId: user.userId,
       },
       include: {
         assessment: {
@@ -187,8 +195,6 @@ export class CandidateAssessmentService {
       answers: dto.answers,
     });
 
-    // console.log('evaluated:', evaluated);
-
     // SAVE RESPONSES
     await this.prisma.response.createMany({
       data: evaluated.responses.map((response) => ({
@@ -228,80 +234,202 @@ export class CandidateAssessmentService {
     };
   }
 
-  // GET BY ID (CANDIDATE SAFE RESPONSE)
-  async getById(id: string) {
-    const assignment = await this.prisma.candidateAssessment.findUnique({
-      where: {
-        id,
-      },
+  // GET BY ID
+  // async getById(id: string) {
+  //   const assignment = await this.prisma.candidateAssessment.findUnique({
+  //     where: {
+  //       id,
+  //     },
 
-      select: {
-        id: true,
-        status: true,
-        startedAt: true,
-        submittedAt: true,
-        expiresAt: true,
-        createdAt: true,
-        assessment: {
+  //     select: {
+  //       id: true,
+  //       status: true,
+  //       startedAt: true,
+  //       submittedAt: true,
+  //       expiresAt: true,
+  //       createdAt: true,
+  //       assessment: {
+  //         select: {
+  //           id: true,
+  //           assessmentCode: true,
+  //           role: true,
+  //           difficulty: true,
+  //           mcqCount: true,
+  //           codingCount: true,
+  //           primarySkills: true,
+  //           secondarySkills: true,
+  //           focusAreas: true,
+  //           mcqs: {
+  //             select: {
+  //               id: true,
+  //               question: true,
+  //               options: true,
+  //             },
+  //           },
+  //           codingQuestions: {
+  //             select: {
+  //               id: true,
+  //               title: true,
+  //               problem: true,
+  //               constraints: true,
+  //               sampleCases: true,
+  //               expectedApproach: true,
+  //               timeComplexity: true,
+  //               spaceComplexity: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //       responses: {
+  //         select: {
+  //           id: true,
+  //           mcqQuestionId: true,
+  //           codingQuestionId: true,
+  //           selectedOptionIndex: true,
+  //           isCorrect: true,
+  //           codingAnswer: true,
+  //           createdAt: true,
+  //           updatedAt: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   if (!assignment) {
+  //     throw new NotFoundException('Candidate assessment not found');
+  //   }
+
+  //   return assignment;
+  // }
+
+  // GET CANDIDATE ASSESSMENTS
+
+  // Used by manager to get all assessments with all the candidates asoociated with it
+  async getAssessmentsWithCandidates(user: JwtUser) {
+    const assessments = await this.prisma.assessment.findMany({
+      where: {
+        createdById: user.userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        candidateAssessments: {
           select: {
             id: true,
-            role: true,
-            difficulty: true,
-            mcqCount: true,
-            codingCount: true,
-            primarySkills: true,
-            secondarySkills: true,
-            focusAreas: true,
-            mcqs: {
+            status: true,
+            mcqScore: true,
+            codingScore: true,
+            aiScore: true,
+            finalScore: true,
+            skillBreakdown: true,
+            startedAt: true,
+            submittedAt: true,
+            expiresAt: true,
+            candidate: {
               select: {
                 id: true,
-                question: true,
-                options: true,
-              },
-            },
-            codingQuestions: {
-              select: {
-                id: true,
-                title: true,
-                problem: true,
-                constraints: true,
-                sampleCases: true,
-                expectedApproach: true,
-                timeComplexity: true,
-                spaceComplexity: true,
+                name: true,
+                email: true,
               },
             },
           },
-        },
-        responses: {
-          select: {
-            id: true,
-            mcqQuestionId: true,
-            codingQuestionId: true,
-            selectedOptionIndex: true,
-            isCorrect: true,
-            codingAnswer: true,
-            createdAt: true,
-            updatedAt: true,
+          orderBy: {
+            createdAt: 'desc',
           },
         },
       },
     });
 
-    if (!assignment) {
-      throw new NotFoundException('Candidate assessment not found');
-    }
-
-    return assignment;
+    return assessments.map((assessment) => ({
+      assessmentId: assessment.id,
+      role: assessment.role,
+      difficulty: assessment.difficulty,
+      mcqCount: assessment.mcqCount,
+      codingCount: assessment.codingCount,
+      createdAt: assessment.createdAt,
+      candidateAssessmentDetails: assessment.candidateAssessments.map(
+        (candidateAssessment) => ({
+          candidateAssessmentId: candidateAssessment.id,
+          candidateId: candidateAssessment.candidate.id,
+          name: candidateAssessment.candidate.name,
+          email: candidateAssessment.candidate.email,
+          status: candidateAssessment.status,
+          mcqScore: candidateAssessment.mcqScore,
+          codingScore: candidateAssessment.codingScore,
+          aiScore: candidateAssessment.aiScore,
+          finalScore: candidateAssessment.finalScore,
+          startedAt: candidateAssessment.startedAt,
+          skillBreakdown: candidateAssessment.skillBreakdown,
+          submittedAt: candidateAssessment.submittedAt,
+          expiresAt: candidateAssessment.expiresAt,
+        }),
+      ),
+    }));
   }
 
-  // GET CANDIDATE ASSESSMENTS
-  async getCandidateAssessments(candidateId: string) {
-    const assignments = await this.prisma.candidateAssessment.findMany({
-      where: {
-        candidateId,
+  // used by manager to get all assessment assigned to that candidate
+  async getAllAssessmentAssignedToCandidate(
+    user: JwtUser,
+    candidateId: string,
+  ) {
+    const candidateAssessments = await this.prisma.candidateAssessment.findMany(
+      {
+        where: {
+          candidateId,
+          assessment: {
+            createdById: user.userId,
+          },
+        },
+        include: {
+          assessment: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+    );
+
+    return candidateAssessments.map((assignment) => ({
+      candidateAssessmentId: assignment.id,
+      candidateId: assignment.candidateId,
+
+      assessment: {
+        id: assignment.assessment.id,
+        role: assignment.assessment.role,
+        difficulty: assignment.assessment.difficulty,
+        mcqCount: assignment.assessment.mcqCount,
+        codingCount: assignment.assessment.codingCount,
+        createdAt: assignment.assessment.createdAt,
       },
 
+      status: assignment.status,
+
+      scores: {
+        mcqScore: assignment.mcqScore,
+        codingScore: assignment.codingScore,
+        aiScore: assignment.aiScore,
+        finalScore: assignment.finalScore,
+      },
+
+      startedAt: assignment.startedAt,
+      submittedAt: assignment.submittedAt,
+      evaluatedAt: assignment.evaluatedAt,
+      expiresAt: assignment.expiresAt,
+
+      skillBreakdown: assignment.skillBreakdown,
+      evaluationSummary: assignment.evaluationSummary,
+      feedback: assignment.feedback,
+    }));
+  }
+
+  // used by manager to get specific assessment
+  async getSpecificAssessmentForManager(user: JwtUser, id: string) {
+    const assignment = await this.prisma.candidateAssessment.findUnique({
+      where: {
+        id,
+        createdById: user.userId,
+      },
       select: {
         id: true,
         status: true,
@@ -316,6 +444,7 @@ export class CandidateAssessmentService {
         assessment: {
           select: {
             id: true,
+            assessmentCode: true,
             role: true,
             difficulty: true,
             mcqCount: true,
@@ -325,17 +454,148 @@ export class CandidateAssessmentService {
           },
         },
       },
+    });
+
+    return assignment || [];
+  }
+
+  // Used by candidate to get all assessments which is assigned to them
+  async getAllAssessmentAssignedToLoggedInCandidate(user: JwtUser) {
+    const assignments = await this.prisma.candidateAssessment.findMany({
+      where: {
+        candidateId: user.userId,
+      },
+      select: {
+        id: true,
+        status: true,
+        mcqScore: true,
+        codingScore: true,
+        aiScore: true,
+        finalScore: true,
+        skillBreakdown: true,
+        startedAt: true,
+        submittedAt: true,
+        expiresAt: true,
+        createdAt: true,
+        assessment: {
+          select: {
+            id: true,
+            assessmentCode: true,
+            role: true,
+            difficulty: true,
+            mcqCount: true,
+            codingCount: true,
+            primarySkills: true,
+            focusAreas: true,
+
+            mcqs: {
+              select: {
+                id: true,
+                question: true,
+                options: true,
+                explanation: true,
+                difficulty: true,
+                skills: true,
+              },
+              orderBy: {
+                createdAt: 'asc',
+              },
+            },
+
+            codingQuestions: {
+              select: {
+                id: true,
+                title: true,
+                problem: true,
+                constraints: true,
+                sampleCases: true,
+                difficulty: true,
+                // language: true,
+                spaceComplexity: true,
+                timeComplexity: true,
+              },
+              orderBy: {
+                createdAt: 'asc',
+              },
+            },
+          },
+        },
+      },
 
       orderBy: {
         createdAt: 'desc',
       },
     });
 
-    if (assignments.length == 0) {
-      throw new NotFoundException('No assignments found');
-    }
-
     return assignments;
+  }
+
+  // Used by candidate to get one of the assigned assignment
+  async getSpecificAssessmentForCandidate(user: JwtUser, id: string) {
+    const assignment = await this.prisma.candidateAssessment.findUnique({
+      where: {
+        id,
+        candidateId: user.userId,
+      },
+      select: {
+        id: true,
+        status: true,
+        mcqScore: true,
+        codingScore: true,
+        aiScore: true,
+        finalScore: true,
+        skillBreakdown: true,
+        startedAt: true,
+        submittedAt: true,
+        expiresAt: true,
+        createdAt: true,
+        assessment: {
+          select: {
+            id: true,
+            assessmentCode: true,
+            role: true,
+            difficulty: true,
+            mcqCount: true,
+            codingCount: true,
+            primarySkills: true,
+            focusAreas: true,
+
+            mcqs: {
+              select: {
+                id: true,
+                question: true,
+                options: true,
+                explanation: true,
+                difficulty: true,
+                skills: true,
+              },
+              orderBy: {
+                createdAt: 'asc',
+              },
+            },
+
+            codingQuestions: {
+              select: {
+                id: true,
+                title: true,
+                problem: true,
+                constraints: true,
+                sampleCases: true,
+                difficulty: true,
+                // language: true,
+                spaceComplexity: true,
+                timeComplexity: true,
+              },
+              orderBy: {
+                createdAt: 'asc',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return assignment || [];
   }
 
   private async updateUserSkillProfile(candidateId: string) {
@@ -416,4 +676,35 @@ export class CandidateAssessmentService {
       },
     });
   }
+
+  // GET CANDIDATES BY ASSESSMENT
+  // async getCandidatesByAssessment(assessmentId: string) {
+  //   const assignments = await this.prisma.candidateAssessment.findMany({
+  //     where: {
+  //       assessmentId,
+  //     },
+  //     include: {
+  //       candidate: {
+  //         select: {
+  //           id: true,
+  //           name: true,
+  //           email: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   return assignments.map((assignment) =>
+  //     CandidateByAssessmentSchema.parse({
+  //       candidateAssessmentId: assignment.id,
+  //       candidateId: assignment.candidate.id,
+  //       candidateName: assignment.candidate.name,
+  //       candidateEmail: assignment.candidate.email,
+  //       status: assignment.status,
+  //       score: assignment.finalScore,
+  //       startedAt: assignment.startedAt,
+  //       submittedAt: assignment.submittedAt,
+  //     }),
+  //   );
+  // }
 }

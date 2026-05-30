@@ -413,32 +413,7 @@
         ]
       }
     },
-    "/candidate-assessments/assign": {
-      "post": {
-        "operationId": "CandidateAssessmentController_assignAssessment",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssignAssessmentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Assessment assigned successfully"
-          }
-        },
-        "summary": "Assign assessment to candidate",
-        "tags": [
-          "Candidate Assessments"
-        ]
-      }
-    },
-    "/candidate-assessments/start": {
+    "/candidate-assessments/candidate/start": {
       "patch": {
         "operationId": "CandidateAssessmentController_startAssessment",
         "parameters": [],
@@ -457,13 +432,13 @@
             "description": ""
           }
         },
-        "summary": "Start candidate assessment",
+        "summary": "[Candidate] Start assessment",
         "tags": [
           "Candidate Assessments"
         ]
       }
     },
-    "/candidate-assessments/submit": {
+    "/candidate-assessments/candidate/submit": {
       "patch": {
         "operationId": "CandidateAssessmentController_submitAssessment",
         "parameters": [],
@@ -482,13 +457,77 @@
             "description": ""
           }
         },
-        "summary": "Submit candidate assessment",
+        "summary": "[Candidate] Submit assessment",
         "tags": [
           "Candidate Assessments"
         ]
       }
     },
-    "/candidate-assessments/{id}": {
+    "/candidate-assessments/candidate/assign": {
+      "post": {
+        "operationId": "CandidateAssessmentController_assignAssessment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Assessment assigned successfully"
+          }
+        },
+        "summary": "[MANAGER] Assign assessment to candidate",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/manager/assessments": {
+      "get": {
+        "operationId": "CandidateAssessmentController_getAssessmentsWithCandidates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "[MANAGER] Get all assessments with all assigned candidates",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/manager/candidates/{candidateId}": {
+      "get": {
+        "operationId": "CandidateAssessmentController_getAllAssessmentAssignedToCandidate",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "[MANAGER] Get candidate wise assessment, means all assignments assigned to that candidate",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/manager/assessments/{id}": {
       "get": {
         "operationId": "CandidateAssessmentController_getById",
         "parameters": [
@@ -506,18 +545,33 @@
             "description": ""
           }
         },
-        "summary": "Get assigned assessment details by id",
+        "summary": "[MANAGER] Get assigned assessment details by id",
         "tags": [
           "Candidate Assessments"
         ]
       }
     },
-    "/candidate-assessments/candidate/{candidateId}": {
+    "/candidate-assessments/candidate/assessments": {
       "get": {
-        "operationId": "CandidateAssessmentController_getCandidateAssessments",
+        "operationId": "CandidateAssessmentController_getAllAssessmentAssignedToLoggedInCandidate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "[CANDIDATE] Get all assessments for logged in candidate",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/candidate/assessments/{id}": {
+      "get": {
+        "operationId": "CandidateAssessmentController_getAllAssessmentAssignedToLoggedInCandidateById",
         "parameters": [
           {
-            "name": "candidateId",
+            "name": "id",
             "required": true,
             "in": "path",
             "schema": {
@@ -530,44 +584,9 @@
             "description": ""
           }
         },
-        "summary": "Get assessments assigned to candidate",
+        "summary": "[CANDIDATE] Get one of the assigned assigned by candidate",
         "tags": [
           "Candidate Assessments"
-        ]
-      }
-    },
-    "/resume/upload": {
-      "post": {
-        "description": "Upload the resume",
-        "operationId": "ResumeController_uploadResume",
-        "parameters": [
-          {
-            "name": "x-llm-provider",
-            "required": true,
-            "in": "header",
-            "description": "LLM Provider [ gemini | openai ]",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "required": true,
-            "in": "header",
-            "description": "Your Api Key",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Upload the resume",
-        "tags": [
-          "Resume"
         ]
       }
     }
@@ -742,27 +761,6 @@
           "codingCount"
         ]
       },
-      "AssignAssessmentDto": {
-        "type": "object",
-        "properties": {
-          "candidateId": {
-            "type": "string",
-            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
-          },
-          "assessmentId": {
-            "type": "string",
-            "example": "4000eced-68f1-42ba-bee7-7cf4e818eb52"
-          },
-          "expiresAt": {
-            "type": "string",
-            "example": "2026-06-01T12:00:00.000Z"
-          }
-        },
-        "required": [
-          "candidateId",
-          "assessmentId"
-        ]
-      },
       "StartAssessmentDto": {
         "type": "object",
         "properties": {
@@ -809,6 +807,27 @@
         "required": [
           "candidateAssessmentId",
           "answers"
+        ]
+      },
+      "AssignAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "example": "1203e303-762a-4a36-8271-b2f43ba83991"
+          },
+          "assessmentId": {
+            "type": "string",
+            "example": "4000eced-68f1-42ba-bee7-7cf4e818eb52"
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2026-06-01T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "candidateId",
+          "assessmentId"
         ]
       }
     }

@@ -6,6 +6,7 @@ import {
   Headers,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -18,6 +19,12 @@ import {
 
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AssessmentService } from './assessment.service';
+import { RolesGuard } from 'src/auth/roles/roles.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+import { JwtUser } from 'src/auth/interfaces/jwt-payload.interface';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Assessments')
 @Controller('assessments')
@@ -40,20 +47,30 @@ export class AssessmentController {
     status: 201,
     description: 'Assessment generated successfully',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
   async generateAssessment(
     @Body() dto: CreateAssessmentDto,
     @Headers('x-llm-provider') llmProvider: string,
     @Headers('x-api-key') apiKey: string,
+    @CurrentUser() user: JwtUser,
   ) {
-    return this.assessmentService.generateAssessment(dto, llmProvider, apiKey);
+    return this.assessmentService.generateAssessment(
+      dto,
+      user,
+      llmProvider,
+      apiKey,
+    );
   }
 
   @Get()
   @ApiOperation({
     summary: 'Fetch all assessments',
   })
-  async getAssessments() {
-    return this.assessmentService.getAssessments();
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
+  async getAssessments(@CurrentUser() user: JwtUser) {
+    return this.assessmentService.getAssessments(user);
   }
 
   @Get(':id')
@@ -63,8 +80,10 @@ export class AssessmentController {
   @ApiParam({
     name: 'id',
   })
-  async getAssessment(@Param('id') id: string) {
-    return this.assessmentService.getAssessment(id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
+  async getAssessment(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.assessmentService.getAssessment(id, user);
   }
 
   @Delete(':id')
@@ -74,7 +93,12 @@ export class AssessmentController {
   @ApiParam({
     name: 'id',
   })
-  async deleteAssessment(@Param('id') id: string) {
-    return this.assessmentService.deleteAssessment(id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
+  async deleteAssessment(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.assessmentService.deleteAssessment(id, user);
   }
 }

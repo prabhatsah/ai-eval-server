@@ -1,12 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-
 import { PassportStrategy } from '@nestjs/passport';
-
 import { Strategy, ExtractJwt } from 'passport-jwt';
-
 import { Request } from 'express';
-
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { JwtUser } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -31,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtUser) {
     if (!payload) {
       throw new UnauthorizedException('Session expired, please login.');
     }

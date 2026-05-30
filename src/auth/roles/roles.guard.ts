@@ -1,27 +1,43 @@
 import {
   CanActivate,
   ExecutionContext,
-  Injectable,
   ForbiddenException,
+  Injectable,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { RequestWithUser } from '../interfaces/jwt-payload.interface';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // Route has no role protection
+    if (!requiredRoles) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
+
     const user = request.user;
-    const requiredRoles = this.getRoles(context);
 
-    if (!requiredRoles) return true;
+    // Extra safety check
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
 
-    if (!requiredRoles.includes(user.role)) {
+    const hasRole = requiredRoles.includes(user.role);
+
+    if (!hasRole) {
       throw new ForbiddenException('Access denied');
     }
 
     return true;
-  }
-
-  private getRoles(context: ExecutionContext): string[] | undefined {
-    return Reflect.getMetadata('roles', context.getHandler());
   }
 }
