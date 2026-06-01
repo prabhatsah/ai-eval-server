@@ -284,30 +284,6 @@
         ]
       }
     },
-    "/jd/group/{groupId}": {
-      "get": {
-        "operationId": "JdController_getLatest",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Get latest JD by groupId",
-        "tags": [
-          "Job Description"
-        ]
-      }
-    },
     "/assessments/generate": {
       "post": {
         "operationId": "AssessmentController_generateAssessment",

@@ -3,7 +3,7 @@ const pdfParse = require('pdf-parse');
 
 import * as mammoth from 'mammoth';
 
-export async function extractResumeText(
+export async function extractTextFromFile(
   file: Express.Multer.File,
 ): Promise<string> {
   const mimeType = file.mimetype;

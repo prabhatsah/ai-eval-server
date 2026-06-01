@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResumeParserAgent } from './agents/resume-parser.agent';
-import { extractResumeText } from './utils/resume-text-extractor';
+import { extractTextFromFile } from './utils/resume-text-extractor';
 
 @Injectable()
 export class ResumeService {
@@ -17,7 +17,7 @@ export class ResumeService {
     llmProvider: string,
     apiKey: string,
   ) {
-    const text = await extractResumeText(file);
+    const text = await extractTextFromFile(file);
 
     // ai parse
     const parsed = await this.resumeParserAgent.parseResume(

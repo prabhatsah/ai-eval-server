@@ -1,15 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { JdParserAgent } from './agents/jd-parser.agent';
-import { extractResumeText } from 'src/resume/utils/resume-text-extractor';
-import { userIdParamSchema } from 'src/user/validators/user.schema';
+import { extractTextFromFile } from 'src/resume/utils/resume-text-extractor';
 import { JwtUser } from 'src/auth/interfaces/jwt-payload.interface';
+import { JdProcessingWorkflow } from './workflows/jd-processing.workflow';
 
 @Injectable()
 export class JdService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jdParserAgent: JdParserAgent,
+    private readonly jdWorkflow: JdProcessingWorkflow,
   ) {}
 
   async parseJd(
@@ -29,43 +28,42 @@ export class JdService {
     if (!apiKey) {
       throw new BadRequestException('API key is missing');
     }
-    // Extract text
-    const text = await extractResumeText(file);
 
-    // Parse JD
-    const parsed = await this.jdParserAgent.parseJD(text, llmProvider, apiKey);
+    const rawText = await extractTextFromFile(file);
 
-    // Versioning logic
+    const workflowResult = await this.jdWorkflow.execute(
+      rawText,
+      llmProvider,
+      apiKey,
+    );
+
     const jdGroupId = crypto.randomUUID();
 
     const version = 1;
 
-    // Save in DB
     const jd = await this.prisma.jobDescription.create({
       data: {
         jdGroupId,
         createdById: user.userId,
         version,
-        ...parsed,
-        rawText: text,
+        rawText,
+
+        ...workflowResult.parsed,
       },
     });
 
-    return jd;
+    return {
+      jd,
+      workflow: {
+        critique: workflowResult.critique,
+        attempts: workflowResult.totalAttempts,
+      },
+    };
   }
 
   async getById(id: string, user: JwtUser) {
     return this.prisma.jobDescription.findUnique({
       where: { id, createdById: user.userId },
-    });
-  }
-
-  async getLatestByGroup(jdGroupId: string) {
-    return this.prisma.jobDescription.findFirst({
-      where: {
-        jdGroupId,
-        isLatest: true,
-      },
     });
   }
 

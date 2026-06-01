@@ -94,7 +94,6 @@ export class JdController {
   /* =========================
      GET JD BY ID
   ========================= */
-
   @Get(':id')
   @ApiOperation({
     summary: 'Get job description by ID',
@@ -122,20 +121,19 @@ export class JdController {
   /* =========================
      GET LATEST JD BY GROUP
   ========================= */
-
-  @Get('group/:groupId')
-  @ApiOperation({
-    summary: 'Get latest JD by groupId',
-  })
-  @ApiParam({
-    name: 'groupId',
-  })
-  async getLatest(
-    @Param('groupId') groupId: string,
-    @CurrentUser() user: JwtUser,
-  ) {
-    return this.jdService.getLatestByGroup(groupId);
-  }
+  // @Get('group/:groupId')
+  // @ApiOperation({
+  //   summary: 'Get latest JD by groupId',
+  // })
+  // @ApiParam({
+  //   name: 'groupId',
+  // })
+  // async getLatest(
+  //   @Param('groupId') groupId: string,
+  //   @CurrentUser() user: JwtUser,
+  // ) {
+  //   return this.jdService.getLatestByGroup(groupId);
+  // }
 
   /* =========================
      GET ALL JDs
