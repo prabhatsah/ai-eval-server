@@ -316,6 +316,9 @@ export class CandidateAssessmentService {
       },
       include: {
         candidateAssessments: {
+          orderBy: {
+            createdAt: 'desc',
+          },
           select: {
             id: true,
             status: true,
@@ -327,6 +330,7 @@ export class CandidateAssessmentService {
             startedAt: true,
             submittedAt: true,
             expiresAt: true,
+
             candidate: {
               select: {
                 id: true,
@@ -334,16 +338,27 @@ export class CandidateAssessmentService {
                 email: true,
               },
             },
-            responses: true
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
+
+            responses: {
+              select: {
+                id: true,
+                mcqQuestionId: true,
+                selectedOptionIndex: true,
+                isCorrect: true
+              }
+            },
         },
-        mcqs: true,
-        codingQuestions: true,
       },
-    });
+
+      mcqs: {
+          select: {
+            id: true,
+            skills: true,
+            options: true,
+            correctAnswerIndex: true
+          }
+        }
+    }});
 
     return assessments.map((assessment) => ({
       assessmentId: assessment.id,
@@ -372,10 +387,24 @@ export class CandidateAssessmentService {
           submittedAt: candidateAssessment.submittedAt,
           expiresAt: candidateAssessment.expiresAt,
 
-          responses: candidateAssessment.responses
+          responses: candidateAssessment.responses.map(
+        (response) => ({
+          id: response.id,
+          mcqQuestionId: response.mcqQuestionId,
+          selectedOptionIndex: response.selectedOptionIndex,
+          isCorrect: response.isCorrect,
         }),
       ),
-      mcqs: assessment.mcqs,
+        }),
+      ),
+      mcqs: assessment.mcqs.map(
+        (mcq) => ({
+          id: mcq.id,
+          skills: mcq.skills,
+          options: mcq.options,
+          correctAnswerIndex: mcq.correctAnswerIndex
+        }),
+      ),
       codingQuestions: assessment.codingCount
     }));
   }
@@ -495,6 +524,7 @@ export class CandidateAssessmentService {
         submittedAt: true,
         expiresAt: true,
         createdAt: true,
+
         assessment: {
           select: {
             id: true,
@@ -536,6 +566,15 @@ export class CandidateAssessmentService {
               },
             },
           },
+        },
+
+        responses: {
+          select : {
+            id: true,
+            mcqQuestionId: true,
+            selectedOptionIndex: true,
+            isCorrect: true
+          }
         },
       },
 
