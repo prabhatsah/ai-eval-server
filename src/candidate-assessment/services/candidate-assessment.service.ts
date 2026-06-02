@@ -334,11 +334,14 @@ export class CandidateAssessmentService {
                 email: true,
               },
             },
+            responses: true
           },
           orderBy: {
             createdAt: 'desc',
           },
         },
+        mcqs: true,
+        codingQuestions: true,
       },
     });
 
@@ -368,8 +371,12 @@ export class CandidateAssessmentService {
           skillBreakdown: candidateAssessment.skillBreakdown,
           submittedAt: candidateAssessment.submittedAt,
           expiresAt: candidateAssessment.expiresAt,
+
+          responses: candidateAssessment.responses
         }),
       ),
+      mcqs: assessment.mcqs,
+      codingQuestions: assessment.codingCount
     }));
   }
 
