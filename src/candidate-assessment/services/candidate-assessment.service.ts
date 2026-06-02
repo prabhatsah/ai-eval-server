@@ -353,6 +353,7 @@ export class CandidateAssessmentService {
       mcqs: {
           select: {
             id: true,
+            question: true,
             skills: true,
             options: true,
             correctAnswerIndex: true
@@ -400,6 +401,7 @@ export class CandidateAssessmentService {
       mcqs: assessment.mcqs.map(
         (mcq) => ({
           id: mcq.id,
+          question: mcq.question,
           skills: mcq.skills,
           options: mcq.options,
           correctAnswerIndex: mcq.correctAnswerIndex
