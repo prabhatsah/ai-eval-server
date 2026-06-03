@@ -27,3 +27,19 @@ export const CandidateAssessmentSchema = z.object({
 export type CandidateAssessmentInput = z.infer<
   typeof CandidateAssessmentSchema
 >;
+
+export const SaveMcqAnswerSchema = z.object({
+  candidateAssessmentId: z.uuid(),
+  mcqQuestionId: z.uuid(),
+  selectedOptionIndex: z.number().int().min(-1),
+});
+
+export type SaveMcqAnswerInput = z.infer<typeof SaveMcqAnswerSchema>;
+
+export const SaveCodingAnswerSchema = z.object({
+  candidateAssessmentId: z.uuid(),
+  codingQuestionId: z.uuid(),
+  codingAnswer: z.string().min(1),
+});
+
+export type SaveCodingAnswerInput = z.infer<typeof SaveCodingAnswerSchema>;

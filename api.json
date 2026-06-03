@@ -438,6 +438,56 @@
         ]
       }
     },
+    "/candidate-assessments/candidate/save-mcq-answer": {
+      "post": {
+        "operationId": "CandidateAssessmentController_saveMcqAnswer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McqAnswerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "MCQ answer saved successfully"
+          }
+        },
+        "summary": "[Candidate] Save candidate MCQ answer",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
+    "/candidate-assessments/candidate/save-coding-answer": {
+      "post": {
+        "operationId": "CandidateAssessmentController_saveCodingAnswer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodingAnswerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Coding answer saved successfully"
+          }
+        },
+        "summary": "[Candidate] Save candidate coding answer",
+        "tags": [
+          "Candidate Assessments"
+        ]
+      }
+    },
     "/candidate-assessments/candidate/submit": {
       "patch": {
         "operationId": "CandidateAssessmentController_submitAssessment",
@@ -830,6 +880,9 @@
       "McqAnswerDto": {
         "type": "object",
         "properties": {
+          "candidateAssessmentId": {
+            "type": "string"
+          },
           "mcqQuestionId": {
             "type": "string"
           },
@@ -841,8 +894,29 @@
           }
         },
         "required": [
+          "candidateAssessmentId",
           "mcqQuestionId",
           "selectedOptionIndex"
+        ]
+      },
+      "CodingAnswerDto": {
+        "type": "object",
+        "properties": {
+          "candidateAssessmentId": {
+            "type": "string"
+          },
+          "codingQuestionId": {
+            "type": "string"
+          },
+          "codingAnswer": {
+            "type": "string",
+            "example": "function solve() { return true; }"
+          }
+        },
+        "required": [
+          "candidateAssessmentId",
+          "codingQuestionId",
+          "codingAnswer"
         ]
       },
       "SubmitAssessmentDto": {
@@ -850,17 +924,10 @@
         "properties": {
           "candidateAssessmentId": {
             "type": "string"
-          },
-          "answers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/McqAnswerDto"
-            }
           }
         },
         "required": [
-          "candidateAssessmentId",
-          "answers"
+          "candidateAssessmentId"
         ]
       },
       "AssignAssessmentDto": {
