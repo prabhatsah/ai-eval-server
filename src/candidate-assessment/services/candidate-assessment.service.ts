@@ -515,18 +515,15 @@ export class CandidateAssessmentService {
           })),
         }),
       ),
-        }),
-      ),
-      mcqs: assessment.mcqs.map(
-        (mcq) => ({
-          id: mcq.id,
-          question: mcq.question,
-          skills: mcq.skills,
-          options: mcq.options,
-          correctAnswerIndex: mcq.correctAnswerIndex
-        }),
-      ),
-      codingQuestions: assessment.codingCount
+
+      mcqs: assessment.mcqs.map((mcq) => ({
+        id: mcq.id,
+        question: mcq.question,
+        skills: mcq.skills,
+        options: mcq.options,
+        correctAnswerIndex: mcq.correctAnswerIndex,
+      })),
+      codingQuestions: assessment.codingCount,
     }));
   }
 
