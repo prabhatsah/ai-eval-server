@@ -477,6 +477,17 @@ export class CandidateAssessmentService {
             correctAnswerIndex: true,
           },
         },
+
+        codingQuestions: {
+          select: {
+            id: true,
+            title: true,
+            problem: true,
+            constraints: true,
+            sampleCases: true,
+            hiddenTestCases: true,
+          },
+        },
       },
     });
 
@@ -523,7 +534,15 @@ export class CandidateAssessmentService {
         options: mcq.options,
         correctAnswerIndex: mcq.correctAnswerIndex,
       })),
-      codingQuestions: assessment.codingCount,
+
+      codingQuestions: assessment.codingQuestions.map((ques) => ({
+        id: ques.id,
+        title: ques.title,
+        problem: ques.problem,
+        constraints: ques.constraints,
+        sampleCases: ques.sampleCases,
+        hiddenTestCases: ques.hiddenTestCases,
+      })),
     }));
   }
 
@@ -674,6 +693,7 @@ export class CandidateAssessmentService {
                 problem: true,
                 constraints: true,
                 sampleCases: true,
+                hiddenTestCases: true,
                 difficulty: true,
                 // language: true,
                 spaceComplexity: true,
@@ -755,6 +775,7 @@ export class CandidateAssessmentService {
                 problem: true,
                 constraints: true,
                 sampleCases: true,
+                hiddenTestCases: true,
                 difficulty: true,
                 // language: true,
                 spaceComplexity: true,
