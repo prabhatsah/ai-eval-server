@@ -732,7 +732,7 @@ export class CandidateAssessmentService {
     const assignment = await this.prisma.candidateAssessment.findUnique({
       where: {
         id,
-        candidateId: user.userId,
+        // candidateId: user.userId,
       },
       select: {
         id: true,
