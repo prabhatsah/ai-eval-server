@@ -337,6 +337,9 @@ export class CandidateAssessmentService {
       },
     });
 
+    // UPDATE USER SKILL PROFILE
+    await this.updateUserSkillProfile(assignment.candidateId);
+
     return {
       status: CandidateAssessmentStatus.EVALUATED,
       score: finalScore,
@@ -915,13 +918,10 @@ export class CandidateAssessmentService {
     const assessments = await this.prisma.candidateAssessment.findMany({
       where: {
         candidateId,
-
         status: 'EVALUATED',
       },
-
       select: {
         skillBreakdown: true,
-
         finalScore: true,
       },
     });
@@ -935,7 +935,6 @@ export class CandidateAssessmentService {
     > = {};
 
     let totalScore = 0;
-
     let totalAssessments = 0;
 
     for (const assessment of assessments) {
@@ -960,7 +959,6 @@ export class CandidateAssessmentService {
         }
 
         skillAccumulator[skill].total += breakdown[skill];
-
         skillAccumulator[skill].count += 1;
       }
     }
