@@ -316,7 +316,7 @@ export class CandidateAssessmentService {
     );
 
     // TODO: CODING EVALUATION
-    const codingScore = 1;
+    const codingScore = 0;
 
     // FINAL SCORE
     const finalScore = mcqResult.percentage + codingScore;
